@@ -43,6 +43,7 @@ export class SupabaseSyncService {
       name: book.name,
       currency_code: book.currencyCode,
       category: book.category || 'other',
+      business_id: book.businessId || book.id,
       schema_version: book.schemaVersion,
       created_at: book.createdAt,
       updated_at: book.updatedAt,
@@ -57,6 +58,7 @@ export class SupabaseSyncService {
       const payload = transactions.map((t) => ({
         id: t.id,
         book_id: t.bookId,
+        business_id: t.businessId || book.businessId || book.id,
         type: t.type,
         amount_minor: t.amountMinor,
         transaction_date: t.transactionDate,
@@ -125,17 +127,23 @@ export class SupabaseSyncService {
       const { data, error } = await supabase.from('books').select('*').order('created_at', { ascending: false });
       if (error || !data) return [];
 
-      const books: Book[] = data.map((row) => ({
-        id: row.id,
-        name: row.name,
-        currencyCode: row.currency_code,
-        category: (row.category as BusinessCategory) || 'other',
-        schemaVersion: row.schema_version,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-      }));
+      const books: Book[] = [];
+      for (const row of data) {
+        const local = await db.books.get(row.id);
+        books.push({
+          id: row.id,
+          name: row.name,
+          currencyCode: row.currency_code,
+          category: (row.category as BusinessCategory) || 'other',
+          businessId: row.business_id || local?.businessId || row.id,
+          userId: local?.userId,
+          schemaVersion: row.schema_version,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        });
+      }
 
-      // Reconcile with local DB
+      // Reconcile with local DB preserving userId and businessId
       await db.books.bulkPut(books);
       return books;
     } catch (e) {
@@ -167,11 +175,15 @@ export class SupabaseSyncService {
       return { book: null, transactions: [] };
     }
 
+    const existingLocalBook = await db.books.get(bookId);
+
     const remoteBook: Book = {
       id: remoteBookRow.id,
       name: remoteBookRow.name,
       currencyCode: remoteBookRow.currency_code,
       category: (remoteBookRow.category as BusinessCategory) || 'other',
+      businessId: remoteBookRow.business_id || existingLocalBook?.businessId || remoteBookRow.id,
+      userId: existingLocalBook?.userId,
       schemaVersion: remoteBookRow.schema_version,
       createdAt: remoteBookRow.created_at,
       updatedAt: remoteBookRow.updated_at,
@@ -191,6 +203,7 @@ export class SupabaseSyncService {
     const remoteTxns: Transaction[] = (remoteTxnRows || []).map((row) => ({
       id: row.id,
       bookId: row.book_id,
+      businessId: row.business_id || existingLocalBook?.businessId || row.book_id,
       type: row.type as 'income' | 'expense',
       amountMinor: Number(row.amount_minor),
       transactionDate: row.transaction_date,

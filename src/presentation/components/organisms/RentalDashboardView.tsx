@@ -5,7 +5,7 @@ import { Button } from '../ui/Button';
 import { RentalRemindersWidget } from './RentalRemindersWidget';
 import { RentalTransactionModal } from './RentalTransactionModal';
 import { formatMoney } from '../../../domain/money';
-import { Home, Wrench, ArrowUpRight, ArrowDownRight, Phone, Calendar, Plus, Trash2, FileSpreadsheet, AlertCircle } from 'lucide-react';
+import { Home, Wrench, ArrowUpRight, ArrowDownRight, Phone, Calendar, Plus, Trash2, FileSpreadsheet, AlertCircle, CheckCircle2, Search } from 'lucide-react';
 import { MonthNavigator } from '../molecules/MonthNavigator';
 
 interface RentalDashboardViewProps {
@@ -19,6 +19,7 @@ export const RentalDashboardView: React.FC<RentalDashboardViewProps> = ({ onDele
     rentalSummary,
     rentalReminders,
     monthTransactions,
+    allTransactions,
     addRentalPayment,
     addPropertyExpense,
     removeTransaction,
@@ -26,9 +27,25 @@ export const RentalDashboardView: React.FC<RentalDashboardViewProps> = ({ onDele
   } = useBook();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewScope, setViewScope] = useState<'month' | 'all'>('month');
+  const [searchQuery, setSearchQuery] = useState('');
   const [phoneNotice, setPhoneNotice] = useState<string | null>(null);
+  const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
   const currencyCode = book?.currencyCode || 'TZS';
+
+  const handleSaveRent = async (data: Parameters<typeof addRentalPayment>[0]) => {
+    await addRentalPayment(data);
+    const numAmt = parseFloat(data.amountInput.replace(/,/g, '')) || 0;
+    setSuccessNotice(`Rent payment of ${formatMoney(numAmt * 100, currencyCode)} for ${data.tenantName} (${data.roomNumber}) recorded successfully!`);
+    setTimeout(() => setSuccessNotice(null), 6000);
+  };
+
+  const handleSaveExpense = async (data: Parameters<typeof addPropertyExpense>[0]) => {
+    await addPropertyExpense(data);
+    setSuccessNotice(`Property expense for "${data.category}" recorded successfully!`);
+    setTimeout(() => setSuccessNotice(null), 6000);
+  };
 
   const handleCallTenant = (phone?: string | null, name?: string | null) => {
     const rawPhone = phone?.trim() || '';
@@ -43,10 +60,44 @@ export const RentalDashboardView: React.FC<RentalDashboardViewProps> = ({ onDele
     window.location.href = `tel:${cleanPhone}`;
   };
 
+  // Determine transactions to display
+  const baseTransactions = viewScope === 'month' ? monthTransactions : allTransactions;
+  const filteredTransactions = baseTransactions.filter((txn) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      (txn.tenantName && txn.tenantName.toLowerCase().includes(q)) ||
+      (txn.roomNumber && txn.roomNumber.toLowerCase().includes(q)) ||
+      (txn.note && txn.note.toLowerCase().includes(q)) ||
+      (txn.category && txn.category.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <div className="space-y-4">
       {/* Month Navigator */}
       <MonthNavigator />
+
+      {/* Success Notification Banner */}
+      {successNotice && (
+        <div
+          role="status"
+          className="p-3 bg-emerald-50 border-2 border-emerald-600 rounded-control text-xs font-black text-emerald-800 flex items-center justify-between gap-2 shadow-brutal-sm animate-fade-in"
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{successNotice}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessNotice(null)}
+            className="text-emerald-800 hover:text-blackstone p-1 cursor-pointer font-black text-xs"
+            aria-label="Dismiss message"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* 1. Rental Financial Summary Cards (Total Revenue & Property Expenses) */}
       <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
@@ -121,14 +172,44 @@ export const RentalDashboardView: React.FC<RentalDashboardViewProps> = ({ onDele
 
       {/* 4. Rental Transactions Ledger */}
       <Card shadowSize="md" className="p-4 space-y-3">
-        <div className="flex items-center justify-between border-b border-blackstone/10 pb-2">
-          <h3 className="text-xs font-black uppercase tracking-wider text-blackstone font-heading">
-            Rental Ledger ({monthTransactions.length})
-          </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blackstone/10 pb-2">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-text-secondary">
-              {selectedMonth}
-            </span>
+            <h3 className="text-xs font-black uppercase tracking-wider text-blackstone font-heading">
+              Rental Ledger ({filteredTransactions.length})
+            </h3>
+            {/* View Scope Switcher Tabs */}
+            <div className="flex border border-blackstone rounded bg-surface p-0.5 text-[10px] font-black">
+              <button
+                type="button"
+                onClick={() => setViewScope('month')}
+                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+                  viewScope === 'month'
+                    ? 'bg-blackstone text-white shadow-xs'
+                    : 'text-text-secondary hover:text-blackstone'
+                }`}
+              >
+                This Month ({monthTransactions.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewScope('all')}
+                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+                  viewScope === 'all'
+                    ? 'bg-blackstone text-white shadow-xs'
+                    : 'text-text-secondary hover:text-blackstone'
+                }`}
+              >
+                All History ({allTransactions.length})
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {viewScope === 'month' && (
+              <span className="text-[11px] font-mono text-text-secondary">
+                {selectedMonth}
+              </span>
+            )}
             <button
               onClick={downloadExcel}
               title="Download Excel workbook (.xlsx)"
@@ -139,6 +220,20 @@ export const RentalDashboardView: React.FC<RentalDashboardViewProps> = ({ onDele
             </button>
           </div>
         </div>
+
+        {/* Quick Search */}
+        {baseTransactions.length > 2 && (
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search by tenant name, room number, or note..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-8 pl-8 pr-3 text-xs font-bold bg-surface border border-blackstone/30 rounded-control focus:border-blackstone outline-none"
+            />
+          </div>
+        )}
 
         {phoneNotice && (
           <div
@@ -163,11 +258,25 @@ export const RentalDashboardView: React.FC<RentalDashboardViewProps> = ({ onDele
           </div>
         )}
 
-        {monthTransactions.length === 0 ? (
+        {filteredTransactions.length === 0 ? (
           <div className="py-8 text-center space-y-2">
             <p className="text-xs font-bold text-text-secondary">
-              No rent payments or property expenses recorded in this month.
+              {viewScope === 'month'
+                ? `No rent payments or property expenses recorded in ${selectedMonth}.`
+                : 'No rental records found.'}
             </p>
+            {viewScope === 'month' && allTransactions.length > 0 && (
+              <p className="text-[11px] text-text-secondary font-medium">
+                You have {allTransactions.length} recorded entry in other months.{' '}
+                <button
+                  type="button"
+                  onClick={() => setViewScope('all')}
+                  className="text-slate-navy font-bold underline cursor-pointer"
+                >
+                  View All History →
+                </button>
+              </p>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -175,12 +284,12 @@ export const RentalDashboardView: React.FC<RentalDashboardViewProps> = ({ onDele
               onClick={() => setIsModalOpen(true)}
             >
               <Plus className="w-3 h-3" />
-              <span>Record First Rent Entry</span>
+              <span>Record Rent Payment</span>
             </Button>
           </div>
         ) : (
           <div className="space-y-2">
-            {monthTransactions.map((txn) => {
+            {filteredTransactions.map((txn) => {
               const isIncome = txn.type === 'income';
 
               return (
@@ -273,8 +382,8 @@ export const RentalDashboardView: React.FC<RentalDashboardViewProps> = ({ onDele
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         currencyCode={currencyCode}
-        onSaveRentPayment={addRentalPayment}
-        onSavePropertyExpense={addPropertyExpense}
+        onSaveRentPayment={handleSaveRent}
+        onSavePropertyExpense={handleSaveExpense}
       />
     </div>
   );

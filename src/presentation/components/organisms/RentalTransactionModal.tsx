@@ -65,6 +65,8 @@ export const RentalTransactionModal: React.FC<RentalTransactionModalProps> = ({
     if (datePaid && calculatedMonths > 0) {
       const autoDue = calculateDueDate(datePaid, calculatedMonths);
       setDueDate(autoDue);
+    } else if (datePaid && !dueDate) {
+      setDueDate(calculateDueDate(datePaid, 1));
     }
   }, [datePaid, calculatedMonths]);
 
@@ -77,17 +79,21 @@ export const RentalTransactionModal: React.FC<RentalTransactionModalProps> = ({
       return;
     }
     if (!roomNumber.trim()) {
-      setError('Room number is required');
+      setError('Room / Unit number is required');
       return;
     }
     if (parsedAmount <= 0) {
-      setError('Please enter a valid amount paid');
+      setError('Please enter a valid amount paid (greater than 0)');
       return;
     }
     if (parsedCharge <= 0) {
-      setError('Please enter the monthly charge per room');
+      setError('Please enter the monthly charge per room (greater than 0)');
       return;
     }
+
+    const finalDueDate = dueDate && dueDate.trim().length > 0
+      ? dueDate.trim()
+      : calculateDueDate(datePaid, calculatedMonths > 0 ? calculatedMonths : 1);
 
     try {
       setIsSubmitting(true);
@@ -96,10 +102,10 @@ export const RentalTransactionModal: React.FC<RentalTransactionModalProps> = ({
         tenantName: tenantName.trim(),
         roomNumber: roomNumber.trim(),
         phoneNumber: phoneNumber.trim() || undefined,
-        amountInput: amountPaid,
-        chargePerRoomInput: chargePerRoom,
+        amountInput: String(parsedAmount),
+        chargePerRoomInput: String(parsedCharge),
         datePaid,
-        dueDate: dueDate || undefined,
+        dueDate: finalDueDate,
         note: rentNote.trim() || undefined,
       });
 
@@ -200,7 +206,7 @@ export const RentalTransactionModal: React.FC<RentalTransactionModalProps> = ({
 
         {/* 1. RENT PAYMENT FORM */}
         {mode === 'rent' && (
-          <form onSubmit={handleRentSubmit} className="space-y-3.5">
+          <form onSubmit={handleRentSubmit} noValidate className="space-y-3.5">
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Tenant Full Name *"
@@ -307,7 +313,7 @@ export const RentalTransactionModal: React.FC<RentalTransactionModalProps> = ({
 
         {/* 2. PROPERTY EXPENSE FORM */}
         {mode === 'expense' && (
-          <form onSubmit={handleExpenseSubmit} className="space-y-3.5">
+          <form onSubmit={handleExpenseSubmit} noValidate className="space-y-3.5">
             <div>
               <label className="block text-xs font-extrabold uppercase tracking-wider text-blackstone/80 mb-1">
                 Property Expense Category *

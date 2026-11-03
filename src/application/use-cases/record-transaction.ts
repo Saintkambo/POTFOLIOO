@@ -4,6 +4,7 @@ import { parseAmountToMinor } from '../../domain/money';
 
 export interface RecordTransactionParams {
   bookId: string;
+  businessId?: string;
   type: TransactionType;
   amountInput: string;
   currencyCode: string;
@@ -43,6 +44,7 @@ export async function recordTransaction(
   const newTxn: Transaction = {
     id: crypto.randomUUID(),
     bookId: params.bookId,
+    businessId: params.businessId,
     type: params.type,
     amountMinor,
     transactionDate: params.transactionDate,

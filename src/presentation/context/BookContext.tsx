@@ -4,7 +4,7 @@ import { clientAuthService } from '../../infrastructure/auth/auth-service';
 import { Book, BusinessCategory } from '../../domain/models/book';
 import { Transaction, TransactionType, PaymentStatus, PaymentMethod, DebtRepayment } from '../../domain/models/transaction';
 import { MonthSummary, calculateMonthSummary } from '../../domain/models/summary';
-import { getCurrentMonthString, offsetMonth } from '../../domain/date';
+import { getCurrentMonthString, offsetMonth, getMonthFromDate } from '../../domain/date';
 import { DexieBookRepository } from '../../infrastructure/db/dexie-book-repository';
 import { DexieTransactionRepository } from '../../infrastructure/db/dexie-transaction-repository';
 import { JsonBackupAdapter } from '../../infrastructure/backup/json-backup-adapter';
@@ -335,28 +335,49 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         setIsLoading(true);
 
-        // 1. Purge any legacy pre-onboarding mock books that lack a legitimate businessId
-        const legacyMockBooks = await db.books.filter((b: Book) => !b.businessId).toArray();
-        for (const mb of legacyMockBooks) {
-          await db.books.delete(mb.id);
-          await db.transactions.where('bookId').equals(mb.id).delete();
-          await db.inventoryItems.where('bookId').equals(mb.id).delete();
+        // 1. Reconcile and self-heal any existing local books (never purge real user data!)
+        const allLocalBooks = await bookRepo.getAllBooks();
+        for (const b of allLocalBooks) {
+          if (b.id === DEMO_RETAIL_BOOK.id || b.id === DEMO_RENTAL_BOOK.id) continue;
+          let modified = false;
+          if (!b.userId && currentUser) {
+            b.userId = currentUser.id;
+            modified = true;
+          }
+          if (!b.businessId) {
+            b.businessId = b.id;
+            modified = true;
+          }
+          if (!b.currencyCode || b.currencyCode === 'USD') {
+            b.currencyCode = 'TZS';
+            modified = true;
+          }
+          if (modified) {
+            await db.books.put(b);
+          }
         }
 
-        // 2. Fetch all legitimate business books for current user
-        let userBooks = (await bookRepo.getBooksByUserId(currentUser.id)).filter((b) => Boolean(b.businessId));
+        // 2. Fetch all business books for current user
+        let userBooks = await bookRepo.getBooksByUserId(currentUser.id);
 
-        // 3. If user has no local books yet, attempt cloud sync from backend
-        if (userBooks.length === 0 && authSession?.token) {
+        // 3. If user has no local books yet, attempt cloud sync from Supabase
+        if (userBooks.length === 0 && isSupabaseConfigured) {
           try {
-            await clientAuthService.syncUserCloudData(currentUser.id, authSession.token);
-            userBooks = (await bookRepo.getBooksByUserId(currentUser.id)).filter((b) => Boolean(b.businessId));
+            const cloudBooks = await supabaseSyncService.pullAllBooksFromCloud();
+            if (cloudBooks.length > 0) {
+              for (const cb of cloudBooks) {
+                cb.userId = currentUser.id;
+                cb.businessId = cb.businessId || cb.id;
+                await db.books.put(cb);
+              }
+              userBooks = await bookRepo.getBooksByUserId(currentUser.id);
+            }
           } catch (syncErr) {
             console.warn('Initial cloud sync notice:', syncErr);
           }
         }
 
-        // 4. If user has no business books yet, leave book as null so user enters 4-step onboarding fresh
+        // 4. If user still has no business books, leave book as null so user enters onboarding
         if (userBooks.length === 0) {
           setBooks([]);
           setBook(null);
@@ -414,7 +435,14 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     startup();
-  }, [currentUser, authSession, reloadData, selectedMonth, isDemoMode]);
+  }, [currentUser, authSession, reloadData, isDemoMode]);
+
+  // Reload transactions whenever active book or selectedMonth changes
+  useEffect(() => {
+    if (book && !isDemoMode) {
+      reloadData(book, selectedMonth);
+    }
+  }, [book?.id, selectedMonth, reloadData, isDemoMode]);
 
   // Switch Active Business
   const switchBook = async (id: string) => {
@@ -646,13 +674,24 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
     monthsPaid?: number;
     dueDate?: string;
   }) => {
-    if (!book) return;
+    let targetBook = book;
+    if (!targetBook) {
+      const allBooks = await bookRepo.getAllBooks();
+      if (allBooks.length > 0) {
+        targetBook = allBooks[0];
+        setBook(targetBook);
+      } else {
+        throw new Error('No active business book selected. Please create or select a business first.');
+      }
+    }
+
     try {
       const savedTxn = await recordTransaction(txnRepo, {
-        bookId: book.id,
+        bookId: targetBook.id,
+        businessId: targetBook.businessId || targetBook.id,
         type: data.type,
         amountInput: data.amountInput,
-        currencyCode: book.currencyCode,
+        currencyCode: targetBook.currencyCode,
         transactionDate: data.transactionDate,
         category: data.category,
         note: data.note,
@@ -663,10 +702,22 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
         monthsPaid: data.monthsPaid,
         dueDate: data.dueDate,
       });
-      await reloadData(book, selectedMonth);
+
+      // Synchronize active month if recorded payment belongs to a different month
+      let txnMonth = selectedMonth;
+      try {
+        txnMonth = getMonthFromDate(data.transactionDate);
+        if (txnMonth !== selectedMonth) {
+          setSelectedMonth(txnMonth);
+        }
+      } catch {
+        txnMonth = selectedMonth;
+      }
+
+      await reloadData(targetBook, txnMonth);
 
       if (isSupabaseConfigured) {
-        supabaseSyncService.pushToCloud(book, [savedTxn]).catch((e) => console.warn('Cloud sync error on add:', e));
+        supabaseSyncService.pushToCloud(targetBook, [savedTxn]).catch((e) => console.warn('Cloud sync error on add:', e));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save transaction');
@@ -685,7 +736,16 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dueDate?: string;
     note?: string;
   }) => {
-    if (!book) return;
+    let targetBook = book;
+    if (!targetBook) {
+      const allBooks = await bookRepo.getAllBooks();
+      if (allBooks.length > 0) {
+        targetBook = allBooks[0];
+        setBook(targetBook);
+      } else {
+        throw new Error('No active rental business found. Please select or create a rental business first.');
+      }
+    }
 
     // Calculate months paid
     const numAmount = parseFloat(data.amountInput.replace(/,/g, '')) || 0;
@@ -693,9 +753,10 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const monthsPaid = numCharge > 0 ? Math.round((numAmount / numCharge) * 10) / 10 : 1;
 
     // Calculate due date if not explicitly provided
-    const calculatedDueDate = data.dueDate && data.dueDate.trim().length > 0
-      ? data.dueDate.trim()
-      : calculateDueDate(data.datePaid, monthsPaid);
+    let calculatedDueDate = data.dueDate && data.dueDate.trim().length > 0 ? data.dueDate.trim() : '';
+    if (!calculatedDueDate) {
+      calculatedDueDate = calculateDueDate(data.datePaid, monthsPaid > 0 ? monthsPaid : 1);
+    }
 
     await addTransaction({
       type: 'income',
