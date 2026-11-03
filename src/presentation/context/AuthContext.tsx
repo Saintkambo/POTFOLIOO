@@ -19,9 +19,10 @@ interface AuthContextType {
   exitDemoMode: () => void;
 
   // Modern Supabase & Unified Auth
-  signUpWithEmail: (params: { fullName: string; email: string; password: string }) => Promise<{ requiresVerification: boolean; email: string }>;
+  signUpWithEmail: (params: { fullName: string; email: string; password: string }) => Promise<{ requiresVerification: boolean; email: string; user?: UserProfile; token?: string }>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   verifyEmailOtp: (email: string, token: string) => Promise<void>;
+  skipVerificationAndEnter: (user: UserProfile, token: string) => Promise<void>;
   resendVerificationEmail: (email: string) => Promise<{ success: boolean; message: string }>;
   signInWithGoogle: () => Promise<void>;
   signInWithPhoneOtp: (phone: string) => Promise<{ success: boolean; message: string }>;
@@ -189,9 +190,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return {
         requiresVerification: res.requiresVerification,
         email: params.email,
+        user: res.user,
+        token: res.token,
       };
     } catch (err: any) {
       setAuthError(err.message || 'Registration failed');
+      throw err;
+    }
+  };
+
+  // Instant bypass verification (for dev, testing, or deferred email validation)
+  const skipVerificationAndEnter = async (user: UserProfile, token: string) => {
+    setAuthError(null);
+    try {
+      const session: AuthSession = { user, token };
+      clientAuthService.saveSession(session);
+      setCurrentUser(user);
+      setAuthSession(session);
+      setIsAppLocked(false);
+    } catch (err: any) {
+      setAuthError(err.message || 'Failed to initialize session');
       throw err;
     }
   };
@@ -379,6 +397,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signInWithEmail,
         resendVerificationEmail,
         verifyEmailOtp,
+        skipVerificationAndEnter,
         signInWithGoogle,
         signInWithPhoneOtp,
         verifyPhoneOtp,

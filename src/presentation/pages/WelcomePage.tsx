@@ -30,6 +30,7 @@ export const WelcomePage: React.FC = () => {
     signUpWithEmail,
     resendVerificationEmail,
     verifyEmailOtp,
+    skipVerificationAndEnter,
     signInWithGoogle,
     signInWithPhoneOtp,
     verifyPhoneOtp,
@@ -55,6 +56,7 @@ export const WelcomePage: React.FC = () => {
 
   // Verification state
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
+  const [pendingUser, setPendingUser] = useState<{ user: any; token: string } | null>(null);
   const [emailOtp, setEmailOtp] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
 
@@ -164,6 +166,9 @@ export const WelcomePage: React.FC = () => {
 
       if (res.requiresVerification) {
         setPendingVerificationEmail(res.email);
+        if (res.user && res.token) {
+          setPendingUser({ user: res.user, token: res.token });
+        }
         setResendCooldown(60);
         setView('verify-email');
       }
@@ -207,6 +212,23 @@ export const WelcomePage: React.FC = () => {
       setSuccessMessage('Email verified successfully! Loading your business workspace...');
     } catch (err: any) {
       setErrorMessage(err.message || 'Invalid or expired confirmation code.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 3c. Instant Bypass Verification (Enter directly without waiting)
+  const handleSkipVerification = async () => {
+    if (!pendingUser) {
+      navigateTo('signin');
+      return;
+    }
+    setIsSubmitting(true);
+    clearMessages();
+    try {
+      await skipVerificationAndEnter(pendingUser.user, pendingUser.token);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to enter workspace.');
     } finally {
       setIsSubmitting(false);
     }
@@ -860,6 +882,31 @@ export const WelcomePage: React.FC = () => {
                     Verify Code & Continue
                   </Button>
                 </form>
+
+                {/* Instant Bypass: Allow users on Android/PC to proceed immediately without waiting for OTP */}
+                {pendingUser && (
+                  <div className="p-3 bg-vivid-amber/15 border-2 border-blackstone rounded-control space-y-2 text-center">
+                    <div className="text-xs font-black text-blackstone flex items-center justify-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-blackstone shrink-0" />
+                      <span>Don't want to wait for email?</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="md"
+                      fullWidth
+                      loading={isSubmitting}
+                      onClick={handleSkipVerification}
+                      className="bg-vivid-amber hover:bg-vivid-amber/90 text-blackstone font-black flex items-center justify-center gap-2 border-2 border-blackstone"
+                    >
+                      <span>Enter Workspace & Set Up Business</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                    <p className="text-[10px] text-text-secondary">
+                      You can confirm your email later from Settings at any time.
+                    </p>
+                  </div>
+                )}
 
                 <p className="text-[11px] text-center text-text-secondary">
                   Or click the secure verification link inside your email message.
