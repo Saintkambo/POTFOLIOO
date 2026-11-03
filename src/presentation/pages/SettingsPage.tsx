@@ -68,6 +68,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenRestoreModal }
   const { theme, setTheme } = useTheme();
   const { currentUser, pinState, setPin, removePin, logout } = useAuth();
 
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [isSettingPin, setIsSettingPin] = useState(false);
   const [newPinInput, setNewPinInput] = useState('');
   const [pinFeedback, setPinFeedback] = useState<string | null>(null);
@@ -177,6 +178,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenRestoreModal }
     }
   };
 
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await logout();
+    } catch (e) {
+      console.warn('Sign out failed:', e);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* 0. Authenticated User Profile & Cloud Account Card */}
@@ -198,12 +210,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenRestoreModal }
             </div>
             <button
               type="button"
-              onClick={logout}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-control bg-canvas hover:bg-rose-50 border-2 border-blackstone text-xs font-black text-danger shadow-xs cursor-pointer neo-press transition-all"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-control bg-canvas hover:bg-rose-50 border-2 border-blackstone text-xs font-black text-danger shadow-xs cursor-pointer neo-press transition-all disabled:opacity-50"
               title="Sign out of POTFOLIOO"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
+              <LogOut className={`w-3.5 h-3.5 ${isSigningOut ? 'animate-spin' : ''}`} />
+              <span>{isSigningOut ? 'Signing Out...' : 'Sign Out'}</span>
             </button>
           </div>
 

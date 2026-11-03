@@ -46,7 +46,7 @@ interface AuthContextType {
     code: string;
     newPassword: string;
   }) => Promise<{ success: boolean; message: string }>;
-  logout: () => void;
+  logout: () => void | Promise<void>;
 
   // Device App-Lock PIN
   verifyPin: (pin: string) => Promise<{ success: boolean; remainingAttempts?: number; lockedForSeconds?: number }>;
@@ -166,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else if (event === 'SIGNED_OUT') {
           setCurrentUser(null);
           setAuthSession(null);
-          clientAuthService.clearSession();
+          // Safely cleared; never call signOut inside SIGNED_OUT handler to avoid infinite loop
         }
       });
 
@@ -328,13 +328,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return clientAuthService.verifyPasswordRecovery(params);
   };
 
-  const logout = () => {
-    clientAuthService.clearSession();
-    setCurrentUser(null);
-    setAuthSession(null);
-    setIsAppLocked(false);
-    setIsDemoMode(false);
-    localStorage.removeItem('potfolioo_demo_mode');
+  const logout = async () => {
+    try {
+      localStorage.setItem('potfolioo_auth_view', 'signin');
+      localStorage.removeItem('potfolioo_active_book_id');
+      localStorage.removeItem('potfolioo_demo_mode');
+
+      await clientAuthService.clearSession();
+
+      setCurrentUser(null);
+      setAuthSession(null);
+      setIsAppLocked(false);
+      setIsDemoMode(false);
+    } catch (e) {
+      console.warn('Logout exception caught:', e);
+      setCurrentUser(null);
+      setAuthSession(null);
+      setIsAppLocked(false);
+    }
   };
 
   const verifyPin = async (pin: string) => {

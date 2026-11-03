@@ -22,7 +22,11 @@ import {
 
 type WelcomeView = 'landing' | 'signin' | 'signup' | 'phone' | 'forgot';
 
-export const WelcomePage: React.FC = () => {
+interface WelcomePageProps {
+  initialView?: WelcomeView;
+}
+
+export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
   const {
     enterDemoMode,
     signInWithEmail,
@@ -35,7 +39,18 @@ export const WelcomePage: React.FC = () => {
   } = useAuth();
 
   const shouldReduceMotion = useReducedMotion();
-  const [view, setView] = useState<WelcomeView>('landing');
+  const [view, setView] = useState<WelcomeView>(() => {
+    if (initialView) return initialView;
+    const requested = localStorage.getItem('potfolioo_auth_view');
+    if (requested === 'signin' || requested === 'signup' || requested === 'phone' || requested === 'forgot') {
+      localStorage.removeItem('potfolioo_auth_view');
+      return requested;
+    }
+    if (localStorage.getItem('potfolioo_had_session') === 'true') {
+      return 'signin';
+    }
+    return 'landing';
+  });
 
   // Sign In state
   const [signInEmail, setSignInEmail] = useState('');

@@ -65,13 +65,34 @@ export class ClientAuthService {
 
   saveSession(session: AuthSession): void {
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    localStorage.setItem('potfolioo_had_session', 'true');
   }
 
-  clearSession(): void {
-    localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(PIN_LOCK_KEY);
+  async clearSession(): Promise<void> {
+    try {
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(PIN_LOCK_KEY);
+      localStorage.removeItem('potfolioo_active_book_id');
+      localStorage.removeItem('potfolioo_demo_mode');
+
+      // Thoroughly clear any cached Supabase auth tokens in local storage
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('sb-') || key.includes('supabase.auth'))) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (e) {
+      console.warn('Local storage clear warning:', e);
+    }
+
     if (isSupabaseConfigured && supabase) {
-      supabase.auth.signOut().catch(() => {});
+      try {
+        // Use local scope to immediately terminate session without blocking on network/remote server
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch (err) {
+        console.warn('Supabase local signOut notice:', err);
+      }
     }
   }
 
