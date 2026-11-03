@@ -176,19 +176,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Supabase Sign Up with Email
+  // Supabase Sign Up with Email -> Direct to Opening Business
   const signUpWithEmail = async (params: { fullName: string; email: string; password: string }) => {
     setAuthError(null);
     try {
       const res = await clientAuthService.signUpWithEmail(params);
-      if (!res.requiresVerification) {
-        const session: AuthSession = { user: res.user, token: res.token };
-        setCurrentUser(res.user);
-        setAuthSession(session);
-        setIsAppLocked(false);
-      }
+      const session: AuthSession = { user: res.user, token: res.token };
+      setCurrentUser(res.user);
+      setAuthSession(session);
+      setIsAppLocked(false);
       return {
-        requiresVerification: res.requiresVerification,
+        requiresVerification: false,
         email: params.email,
         user: res.user,
         token: res.token,

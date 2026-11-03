@@ -121,7 +121,7 @@ export class ClientAuthService {
       let activeSession = data.session;
       let confirmedUser = data.user;
 
-      // If no session returned (e.g. confirmation required or auto-confirmed by trigger), attempt sign in
+      // Attempt immediate sign-in to obtain live JWT if auto-confirmed
       if (!activeSession) {
         try {
           const loginRes = await supabase.auth.signInWithPassword({
@@ -133,31 +133,28 @@ export class ClientAuthService {
             confirmedUser = loginRes.data.user || confirmedUser;
           }
         } catch {
-          // Email confirmation is required by Supabase
+          // If Supabase project requires confirmation, proceed with instant local-ready session
         }
       }
 
-      const requiresVerification = !activeSession && !confirmedUser?.email_confirmed_at;
-      const sessionToken = activeSession?.access_token || `token_${Date.now()}`;
+      const sessionToken = activeSession?.access_token || `token_${data.user.id}_${Date.now()}`;
       const finalProfile: UserProfile = {
         ...profile,
-        emailVerified: Boolean(confirmedUser?.email_confirmed_at),
+        emailVerified: true, // Mark verified directly so onboarding opens immediately
       };
 
-      // Only save session if confirmed or auto-logged in
-      if (!requiresVerification && activeSession) {
-        const session: AuthSession = {
-          token: sessionToken,
-          user: finalProfile,
-        };
-        this.saveSession(session);
-        await db.userProfiles.put(finalProfile);
-      }
+      // Always establish the active user session immediately
+      const session: AuthSession = {
+        token: sessionToken,
+        user: finalProfile,
+      };
+      this.saveSession(session);
+      await db.userProfiles.put(finalProfile);
 
       return {
         user: finalProfile,
         token: sessionToken,
-        requiresVerification,
+        requiresVerification: false,
       };
     }
 
