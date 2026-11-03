@@ -11,23 +11,30 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png'],
       manifest: {
-        name: 'POTFOLIOO Bookkeeping',
+        name: 'POTFOLIOO - Smart Bookkeeping',
         short_name: 'POTFOLIOO',
-        description: 'Simple offline-first personal and small business bookkeeping.',
+        description: 'Smart Bookkeeping & Cash Flow for Growing Businesses and Sole Proprietors.',
         theme_color: '#33415C',
         background_color: '#FFFDF8',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },

@@ -32,12 +32,14 @@ import {
 import { BackupValidationResult } from '../../application/ports/backup-port';
 import { AddBusinessModal } from '../components/organisms/AddBusinessModal';
 import { useTheme } from '../context/ThemeContext';
+import { usePwaInstall } from '../hooks/usePwaInstall';
 
 interface SettingsPageProps {
   onOpenRestoreModal: (result: BackupValidationResult, rawContent: string) => void;
 }
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenRestoreModal }) => {
+  const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
   const {
     book,
     books,
@@ -441,6 +443,54 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenRestoreModal }
             <Moon className="w-4 h-4 text-blackstone" />
             <span>Dark Mode</span>
           </button>
+        </div>
+      </Card>
+
+      {/* PWA App Download / Installation Card (Android & PC) */}
+      <Card shadowSize="lg" className="space-y-3.5 border-2 border-blackstone bg-citron-lime-tint">
+        <div className="flex items-center justify-between border-b border-blackstone/10 pb-2">
+          <div>
+            <h2 className="text-sm font-bold font-heading text-blackstone uppercase tracking-wider flex items-center gap-2">
+              <Download className="w-4 h-4 text-blackstone stroke-[2.2]" />
+              <span>Install POTFOLIOO App</span>
+            </h2>
+            <p className="text-xs text-blackstone/80 mt-0.5">
+              Download and install directly to your Android phone, tablet, or Windows PC.
+            </p>
+          </div>
+          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-citron-lime border border-blackstone text-blackstone">
+            {isInstalled ? 'Installed' : 'Download Ready'}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          {isInstalled ? (
+            <div className="p-3 bg-surface border-2 border-blackstone rounded-control text-xs font-extrabold text-blackstone flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>POTFOLIOO is installed as a standalone application on this device.</span>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                className="w-full justify-center gap-2 bg-slate-navy text-white hover:bg-slate-navy-dark shadow-brutal"
+                onClick={async () => {
+                  const success = await promptInstall();
+                  if (!success && !isInstallable) {
+                    alert('To install on Android: tap Chrome\'s menu (⋮) and select "Install app" or "Add to Home screen". On PC: click the install icon (⊕) in the browser address bar.');
+                  }
+                }}
+              >
+                <Download className="w-4 h-4" />
+                <span>Install on Android / PC</span>
+              </Button>
+              <p className="text-[11px] text-text-secondary leading-snug">
+                Runs full-screen with offline caching, fast desktop/mobile shortcut, and zero browser borders.
+              </p>
+            </div>
+          )}
         </div>
       </Card>
 
