@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Trapvoid Typography Definition with grotesque fallbacks */
+@font-face {
+  font-family: 'Trapvoid';
+  src: local('Trapvoid'), local('Trapvoid-Bold'), local('Trapvoid Bold'), local('Trapvoid-Black');
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Headings & Section Titles Hierarchy */
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Trapvoid', 'Cabinet Grotesk', 'Trap', 'Manrope', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+:root {
+  --color-slate-navy: #33415C;
+  --color-slate-navy-dark: #1F2737;
+  --color-slate-navy-tint: #EEF1F5;
+  --color-citron-lime: #BFD200;
+  --color-citron-lime-dark: #8C9B00;
+  --color-citron-lime-tint: #F7FAE4;
+  --color-vivid-amber: #FFA200;
+  --color-vivid-amber-dark: #C67C00;
+  --color-vivid-amber-tint: #FFF3DF;
+  --color-electric-sky: #48CAE4;
+  --color-electric-sky-dark: #0096C7;
+  --color-electric-sky-tint: #EEF9FD;
+  --color-blackstone: #171717;
+  --color-canvas: #FFFDF8;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F4F2EC;
+  --color-text-secondary: #5B5B5B;
+  --color-border-subtle: #D9D6CE;
+  --color-success: #237A45;
+  --color-danger: #B42318;
+}
+
+body {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-blackstone);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tabular figures for money, counts, and dates */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tactile button press simulation: shifts 2px towards shadow */
+.neo-press:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #171717 !important;
+}
+
+/* Hide scrollbars on mobile viewport while allowing scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ==========================================================================
+   Dark Mode System (Neo-Brutalist Midnight Theme)
+   ========================================================================== */
+
+html.dark {
+  color-scheme: dark;
+  --color-canvas: #0e1015;
+  --color-surface: #171922;
+  --color-surface-muted: #212530;
+  --color-blackstone: #f3f4f6;
+  --color-text-secondary: #9ca3af;
+  --color-border-subtle: #2d323f;
+}
+
+html.dark body {
+  background-color: #0e1015;
+  color: #f3f4f6;
+}
+
+/* Background canvas and surfaces */
+html.dark .bg-canvas {
+  background-color: #0e1015 !important;
+}
+
+html.dark .bg-surface {
+  background-color: #171922 !important;
+}
+
+html.dark .bg-surface\/80 {
+  background-color: rgba(23, 25, 34, 0.8) !important;
+}
+
+html.dark .bg-surface\/90 {
+  background-color: rgba(23, 25, 34, 0.9) !important;
+}
+
+html.dark .bg-surface\/95 {
+  background-color: rgba(23, 25, 34, 0.95) !important;
+}
+
+html.dark .bg-canvas\/95 {
+  background-color: rgba(14, 16, 21, 0.95) !important;
+}
+
+html.dark .bg-surface-muted {
+  background-color: #212530 !important;
+}
+
+/* Borders in Dark Mode */
+html.dark .border-blackstone {
+  border-color: #3b4252 !important;
+}
+
+html.dark .border-blackstone\/10 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .border-blackstone\/20 {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+html.dark .border-blackstone\/30 {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+html.dark .border-blackstone\/40 {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+html.dark .border-blackstone\/60 {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+html.dark .border-border-subtle {
+  border-color: #2d323f !important;
+}
+
+html.dark .divide-blackstone\/10 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Text Colors */
+html.dark .text-blackstone {
+  color: #f3f4f6;
+}
+
+html.dark .text-blackstone\/70 {
+  color: #d1d5db !important;
+}
+
+html.dark .text-blackstone\/80 {
+  color: #e5e7eb !important;
+}
+
+html.dark .text-text-secondary {
+  color: #9ca3af !important;
+}
+
+/* Essential Contrast: ensure buttons and pills with vivid background keep dark legible text */
+html.dark .bg-citron-lime,
+html.dark .bg-citron-lime *,
+html.dark .bg-vivid-amber,
+html.dark .bg-vivid-amber *,
+html.dark .bg-electric-sky,
+html.dark .bg-electric-sky * {
+  color: #171717 !important;
+}
+
+/* Accent Tints in Dark Mode */
+html.dark .bg-citron-lime-tint {
+  background-color: rgba(191, 210, 0, 0.15) !important;
+  color: #d4e815 !important;
+}
+
+html.dark .bg-vivid-amber-tint {
+  background-color: rgba(255, 162, 0, 0.18) !important;
+  color: #fba922 !important;
+}
+
+html.dark .bg-electric-sky-tint {
+  background-color: rgba(72, 202, 228, 0.16) !important;
+  color: #5ed6ee !important;
+}
+
+html.dark .bg-slate-navy-tint {
+  background-color: rgba(51, 65, 92, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Neo-Brutalist Crisp Shadows in Dark Mode */
+html.dark .shadow-brutal-sm {
+  box-shadow: 2px 2px 0px #000000 !important;
+}
+
+html.dark .shadow-brutal {
+  box-shadow: 3px 3px 0px #000000 !important;
+}
+
+html.dark .shadow-brutal-lg {
+  box-shadow: 4px 4px 0px #000000 !important;
+}
+
+html.dark .shadow-brutal-xl {
+  box-shadow: 6px 6px 0px #000000 !important;
+}
+
+html.dark .neo-press:active {
+  box-shadow: 1px 1px 0px #000000 !important;
+}
+
+/* Form Inputs & Selects */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #1f232b !important;
+  color: #f3f4f6 !important;
+  border-color: #3b4252 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Modal Backdrops */
+html.dark .bg-blackstone\/60 {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}

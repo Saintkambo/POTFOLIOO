@@ -1,0 +1,73 @@
+import { Router } from 'express';
+import { BackupService } from '../../infrastructure/backup/backup-service.js';
+import { serializeTransactionsToCsv } from '../../infrastructure/backup/csv-serializer.js';
+import { SqliteTransactionRepository } from '../../infrastructure/repositories/sqlite-transaction-repository.js';
+import { SqliteBookRepository } from '../../infrastructure/repositories/sqlite-book-repository.js';
+import { validate } from '../middlewares/validate.js';
+import { requireApiKey } from '../middlewares/auth.js';
+import { RestoreBackupSchema } from '../../application/validation/schemas.js';
+import { NotFoundError } from '../../domain/errors.js';
+
+export function createBackupRouter(
+  backupService = new BackupService(),
+  bookRepo = new SqliteBookRepository(),
+  txRepo = new SqliteTransactionRepository()
+): Router {
+  const router = Router();
+
+  // GET /api/books/:bookId/backup/export
+  router.get('/books/:bookId/backup/export', (req, res, next) => {
+    try {
+      const bookId = req.params.bookId as string;
+      const backup = backupService.exportBackup(bookId);
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="potfolioo-backup-${bookId}-${new Date().toISOString().slice(0, 10)}.json"`
+      );
+      res.json(backup);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // POST /api/backup/restore (Atomic backup restore)
+  router.post(
+    '/backup/restore',
+    requireApiKey,
+    validate({ body: RestoreBackupSchema }),
+    (req, res, next) => {
+      try {
+        const result = backupService.restoreBackup(req.body);
+        res.json({ success: true, data: result });
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
+
+  // GET /api/books/:bookId/export/csv
+  router.get('/books/:bookId/export/csv', (req, res, next) => {
+    try {
+      const bookId = req.params.bookId as string;
+      const book = bookRepo.findById(bookId);
+      if (!book) {
+        throw new NotFoundError('Book', bookId);
+      }
+
+      const transactions = txRepo.listByBook(bookId);
+      const csv = serializeTransactionsToCsv(transactions, book.currencyCode);
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="potfolioo-${book.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.csv"`
+      );
+      res.send(csv);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  return router;
+}

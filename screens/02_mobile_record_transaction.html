@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=390, height=844, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>POTFOLIOO - Record Transaction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            canvas: '#FFFDF8',
+            surface: '#FFFFFF',
+            blackstone: '#171717',
+            'royal-blue': '#33415C', 'slate-navy': '#33415C', 'electric-sky': '#48CAE4', 'citron-lime': '#BFD200',
+            'nitro-orange': '#FFA200', 'vivid-amber': '#FFA200',
+            'nitro-text': '#C63E0A',
+            'blue-tint': '#EEF9FD', 'sky-tint': '#EEF9FD', 'lime-tint': '#F7FAE4',
+            'orange-tint': '#FFF3DF', 'amber-tint': '#FFF3DF'
+          },
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          boxShadow: {
+            'brutal-sm': '2px 2px 0px #171717',
+            'brutal-md': '3px 3px 0px #171717',
+            'brutal-lg': '4px 4px 0px #171717',
+            'brutal-pressed': '1px 1px 0px #171717'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --color-slate-navy: #33415C;
+      --color-vivid-amber: #FFA200;
+      --color-citron-lime: #BFD200;
+      --color-electric-sky: #48CAE4;
+      --color-blackstone: #171717;
+      --color-canvas: #FFFDF8;
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background-color: #FFFDF8;
+      color: #171717;
+      -webkit-font-smoothing: antialiased;
+      width: 390px;
+      margin: 0 auto;
+      min-height: 844px;
+      overflow-x: hidden;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    .brutal-border {
+      border: 2px solid #171717;
+    }
+  </style>
+</head>
+<body class="bg-canvas min-h-screen flex flex-col justify-between selection:bg-royal-blue selection:text-white">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-[390px] mx-auto min-h-screen flex flex-col justify-between pb-6">
+
+    <!-- Top Fixed/Sticky Header Bar -->
+    <header class="sticky top-0 z-30 bg-canvas/95 backdrop-blur-sm border-b-2 border-blackstone px-4 py-3.5 flex items-center justify-between">
+      <button class="px-2.5 py-1 text-sm font-bold text-blackstone hover:opacity-75 transition-opacity active:translate-y-0.5">
+        Cancel
+      </button>
+
+      <div class="flex items-center gap-1.5">
+        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+        <h1 class="text-lg font-extrabold tracking-tight text-blackstone">Record Transaction</h1>
+      </div>
+
+      <button class="px-3.5 py-1 text-sm font-extrabold text-royal-blue hover:text-blue-700 transition-colors active:translate-y-0.5 flex items-center gap-1">
+        Save
+      </button>
+    </header>
+
+    <!-- Scrollable Form Area -->
+    <main class="flex-1 px-4 pt-4 pb-2 space-y-4">
+
+      <!-- Local storage indicator banner -->
+      <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-surface brutal-border shadow-brutal-sm">
+        <div class="flex items-center gap-2">
+          <svg class="w-3.5 h-3.5 text-blackstone" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          <span class="text-[11px] font-bold text-blackstone/80 uppercase tracking-wider">IndexedDB Local Ledger</span>
+        </div>
+        <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-tint text-royal-blue">ENTRY #015</span>
+      </div>
+
+      <!-- 2. Type Segmented Switcher (Crucial Control) -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between px-0.5">
+          <label class="text-[11px] font-black uppercase tracking-wider text-blackstone/70">Transaction Flow Type</label>
+          <span class="text-[11px] font-bold text-emerald-600">● Cash Inflow</span>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- Button A: Income (Active) -->
+          <button class="relative bg-[#BFD200] text-[#171717] brutal-border rounded-xl py-3 px-3 shadow-brutal-md flex items-center justify-center gap-2 font-black text-sm tracking-wide transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-brutal-sm">
+            <div class="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5 text-[#171717]" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span>+ Income</span>
+            <span class="absolute -top-2 right-2 bg-blackstone text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded">Active</span>
+          </button>
+
+          <!-- Button B: Expense (Inactive) -->
+          <button class="bg-surface text-nitro-text brutal-border rounded-xl py-3 px-3 shadow-sm hover:shadow-brutal-sm flex items-center justify-center gap-2 font-bold text-sm tracking-wide transition-all active:translate-x-0.5 active:translate-y-0.5">
+            <div class="w-5 h-5 rounded-full bg-orange-tint flex items-center justify-center brutal-border">
+              <svg class="w-3 h-3 text-nitro-orange" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+              </svg>
+            </div>
+            <span>- Expense</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Amount Input Section (Visual Centerpiece) -->
+      <div class="bg-surface brutal-border rounded-2xl p-4 shadow-brutal-md relative overflow-hidden">
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-[11px] font-black uppercase tracking-wider text-blackstone/70">Amount (TZS)</label>
+          <span class="px-2 py-0.5 bg-blue-tint text-royal-blue rounded-md text-[11px] font-extrabold brutal-border">Credit +</span>
+        </div>
+
+        <div class="flex items-baseline gap-2 py-1">
+          <span class="text-xl font-black text-blackstone font-mono select-none">TSh</span>
+          <div class="flex-1 flex items-baseline">
+            <span class="text-[34px] leading-tight font-black tracking-tight text-blackstone tabular-nums">1,250,000</span>
+            <span class="text-xl font-extrabold text-blackstone/60 font-mono">.00</span>
+            <!-- Blinking neo-cursor -->
+            <span class="inline-block w-1 h-8 bg-royal-blue ml-1 rounded-sm animate-pulse"></span>
+          </div>
+        </div>
+
+        <!-- Minor Unit / Storage Explainer -->
+        <div class="mt-3 pt-2.5 border-t border-blackstone/10 flex items-center justify-between text-[11px]">
+          <div class="flex items-center gap-1.5 text-blackstone/75 font-medium">
+            <svg class="w-3.5 h-3.5 text-royal-blue shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Stored accurately in integer minor units (cents).</span>
+          </div>
+          <span class="font-mono font-bold text-blackstone/60 text-[10px] bg-canvas px-1.5 py-0.5 rounded border border-blackstone/20">125000¢</span>
+        </div>
+      </div>
+
+      <!-- 4. Transaction Date Field -->
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-black uppercase tracking-wider text-blackstone/70 px-0.5">
+          Transaction Date <span class="font-semibold text-blackstone/50 normal-case">(Determines reporting month)</span>
+        </label>
+        
+        <div class="relative bg-surface brutal-border rounded-xl p-3 shadow-brutal-sm flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-canvas brutal-border flex items-center justify-center text-blackstone shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-sm font-extrabold text-blackstone font-mono tracking-tight">2026-11-02</div>
+              <div class="text-[10px] font-semibold text-blackstone/60">Monday • November Book 2026</div>
+            </div>
+          </div>
+          <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-canvas brutal-border text-blackstone">Today</span>
+        </div>
+      </div>
+
+      <!-- 5. Category Selector -->
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-black uppercase tracking-wider text-blackstone/70 px-0.5">
+          Category <span class="font-normal text-blackstone/50 normal-case">(Optional)</span>
+        </label>
+
+        <!-- Category Dropdown Input -->
+        <div class="bg-surface brutal-border rounded-xl px-3 py-2.5 shadow-brutal-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 transition-colors">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-blue-tint brutal-border flex items-center justify-center text-royal-blue shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+              </svg>
+            </div>
+            <span class="text-sm font-extrabold text-blackstone">Client Payment</span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] font-bold text-royal-blue bg-blue-tint px-2 py-0.5 rounded-full">Consulting Group</span>
+            <svg class="w-4 h-4 text-blackstone/70" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Quick Category Suggestion Chips -->
+        <div class="pt-1">
+          <div class="text-[10px] font-black uppercase tracking-wider text-blackstone/50 mb-1.5 px-0.5">Quick Suggestions:</div>
+          <div class="flex flex-wrap gap-1.5">
+            <button class="bg-white text-royal-blue font-extrabold text-[11px] px-2.5 py-1 rounded-lg brutal-border shadow-brutal-sm hover:bg-blue-tint transition-all active:translate-x-0.5 active:translate-y-0.5">
+              ✓ Consulting
+            </button>
+            <button class="bg-surface text-blackstone font-bold text-[11px] px-2.5 py-1 rounded-lg brutal-border hover:bg-canvas transition-colors">
+              + Sales
+            </button>
+            <button class="bg-surface text-blackstone font-bold text-[11px] px-2.5 py-1 rounded-lg brutal-border hover:bg-canvas transition-colors">
+              + Services
+            </button>
+            <button class="bg-surface text-blackstone font-bold text-[11px] px-2.5 py-1 rounded-lg brutal-border hover:bg-canvas transition-colors">
+              + Reimbursement
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Note / Description -->
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-black uppercase tracking-wider text-blackstone/70 px-0.5">
+          Note or Description <span class="font-normal text-blackstone/50 normal-case">(Optional)</span>
+        </label>
+
+        <div class="bg-surface brutal-border rounded-xl p-3 shadow-brutal-sm focus-within:ring-2 focus-within:ring-royal-blue">
+          <div class="text-sm font-semibold text-blackstone leading-relaxed">
+            Final milestone payment for Q4 redesign
+          </div>
+          <div class="flex justify-between items-center mt-2 pt-2 border-t border-blackstone/10 text-[10px] text-blackstone/50 font-medium">
+            <span>Client: Acme Corp</span>
+            <span>40 / 140 chars</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- 7. Sticky Bottom Action Bar -->
+    <footer class="sticky bottom-0 bg-canvas/95 backdrop-blur-sm border-t-2 border-blackstone p-4 space-y-2 z-30">
+      <!-- Primary Save Button -->
+      <button class="w-full h-[52px] bg-royal-blue text-white brutal-border rounded-xl shadow-brutal-lg flex items-center justify-center gap-2 font-black text-base tracking-wide transition-all active:translate-x-1 active:translate-y-1 active:shadow-none hover:bg-blue-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>Save Transaction</span>
+      </button>
+
+      <!-- Secondary Cancel Button -->
+      <button class="w-full h-[44px] bg-surface text-blackstone brutal-border rounded-xl shadow-sm flex items-center justify-center font-bold text-sm hover:bg-neutral-100 transition-colors active:translate-y-0.5">
+        Cancel
+      </button>
+    </footer>
+
+  </div>
+
+  <!-- Official Motion Animation Controller (Vanilla JS ES Module) -->
+  <script type="module" src="./motion-controller.js"></script>
+</body>
+</html>

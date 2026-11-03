@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POTFOLIOO — Motion Animation Showcase & Screen Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #FFFDF8;
+      color: #171717;
+      -webkit-font-smoothing: antialiased;
+    }
+    .neo-border {
+      border: 2px solid #171717;
+    }
+    .neo-shadow {
+      box-shadow: 4px 4px 0px #171717;
+    }
+    .neo-shadow-sm {
+      box-shadow: 2px 2px 0px #171717;
+    }
+  </style>
+</head>
+<body class="bg-[#FFFDF8] text-[#171717] min-h-screen p-6 md:p-10 max-w-5xl mx-auto selection:bg-[#48CAE4] selection:text-white">
+
+  <!-- Header -->
+  <header class="mb-10 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b-2 border-[#171717]">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF9FD] border-2 border-[#171717] neo-shadow-sm text-xs font-bold text-[#33415C] mb-3">
+        <span class="w-2 h-2 rounded-full bg-[#48CAE4] animate-pulse"></span>
+        Motion (Vanilla JS API) Integration
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">POTFOLIOO Animated Screens</h1>
+      <p class="text-sm text-[#171717]/70 mt-1 max-w-xl font-medium">
+        Experience professional, fast, and tactile entrance animations, button press micro-interactions, and modal physics without React.
+      </p>
+    </div>
+
+    <!-- Live Reduced Motion Simulator Toggle -->
+    <div class="flex items-center gap-3 bg-white p-3 rounded-xl neo-border neo-shadow-sm self-center md:self-auto">
+      <span class="text-xs font-bold uppercase tracking-wider text-[#171717]/80">Reduced Motion:</span>
+      <button id="toggle-reduced-motion" class="px-3 py-1.5 rounded-lg neo-border font-bold text-xs bg-[#F4F2EC] hover:bg-[#EAE6DD] transition-all">
+        System Default (Off)
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Test Demo Section -->
+  <section class="mb-12 bg-white rounded-2xl neo-border neo-shadow p-6 motion-card">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#171717]/10">
+      <div>
+        <h2 class="text-xl font-extrabold text-[#171717]">Interactive Motion Test Deck</h2>
+        <p class="text-xs text-[#171717]/60 font-medium">Test button hover lifts, tactile press offsets, and dynamic card re-triggers directly below.</p>
+      </div>
+      <button id="retrigger-animations" class="px-4 py-2 bg-[#33415C] hover:bg-[#253248] text-white rounded-xl neo-border neo-shadow-sm font-bold text-xs flex items-center gap-2 transition-all">
+        <span>↻ Re-trigger Entrance Animations</span>
+      </button>
+    </div>
+
+    <!-- 3 Demo Metric Cards with Staggered Entrance -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 demo-cards">
+      <!-- Card 1 -->
+      <div class="p-4 rounded-xl bg-[#FFFDF8] neo-border neo-shadow-sm motion-card">
+        <div class="text-[11px] font-extrabold uppercase tracking-wider text-[#171717]/60 mb-1">Total Balance</div>
+        <div class="text-2xl font-extrabold text-[#171717] tabular-nums">+TSh 3,420,000</div>
+        <div class="mt-2 text-xs font-semibold text-[#BFD200] bg-[#171717] inline-block px-2 py-0.5 rounded">▲ +18.4% This Month</div>
+      </div>
+      <!-- Card 2 -->
+      <div class="p-4 rounded-xl bg-[#FFFDF8] neo-border neo-shadow-sm motion-card">
+        <div class="text-[11px] font-extrabold uppercase tracking-wider text-[#171717]/60 mb-1">Monthly Income</div>
+        <div class="text-2xl font-extrabold text-[#33415C] tabular-nums">TSh 4,850,000</div>
+        <div class="mt-2 text-xs font-semibold text-[#33415C]/80">9 recorded deposits</div>
+      </div>
+      <!-- Card 3 -->
+      <div class="p-4 rounded-xl bg-[#FFFDF8] neo-border neo-shadow-sm motion-card">
+        <div class="text-[11px] font-extrabold uppercase tracking-wider text-[#171717]/60 mb-1">Monthly Expenses</div>
+        <div class="text-2xl font-extrabold text-[#FFA200] tabular-nums">TSh 1,430,000</div>
+        <div class="mt-2 text-xs font-semibold text-[#C63E0A]">5 recorded payouts</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Complete Screen Directory -->
+  <section class="space-y-4">
+    <h2 class="text-xl font-extrabold text-[#171717] mb-4">Complete HTML Screen Suite (Click to Open & Test)</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+      <!-- Screen 1 -->
+      <a href="./01_mobile_dashboard.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#33415C] text-white px-2 py-0.5 rounded">01</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Mobile Dashboard</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Net profit hero card, monthly breakdown duo, and transaction rows with staggered entrance.</p>
+      </a>
+
+      <!-- Screen 2 -->
+      <a href="./02_mobile_record_transaction.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#33415C] text-white px-2 py-0.5 rounded">02</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Record Transaction</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Type switcher spring animation, staggered form fields, and tactile save button.</p>
+      </a>
+
+      <!-- Screen 3 -->
+      <a href="./03_mobile_edit_expense.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#33415C] text-white px-2 py-0.5 rounded">03</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Edit Expense</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Category selector modal and tactile deletion confirmation flow.</p>
+      </a>
+
+      <!-- Screen 4 -->
+      <a href="./04_desktop_dashboard.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#33415C] text-white px-2 py-0.5 rounded">04</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Desktop Dashboard</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Responsive multi-column desktop layout with animated metric cards and ledger table.</p>
+      </a>
+
+      <!-- Screen 5 -->
+      <a href="./05_mobile_settings_data.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#33415C] text-white px-2 py-0.5 rounded">05</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Settings & Data Portability</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Book currency configuration, JSON backup export, and restore actions.</p>
+      </a>
+
+      <!-- Screen 6 -->
+      <a href="./06_restore_backup_modal.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#FFA200] text-blackstone px-2 py-0.5 rounded">06</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Restore Backup Modal</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Backdrop blur fade and bouncy neo-brutalist spring pop-in dialog.</p>
+      </a>
+
+      <!-- Screen 7 -->
+      <a href="./07_delete_transaction_modal.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#FFA200] text-blackstone px-2 py-0.5 rounded">07</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Delete Transaction Modal</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Destructive confirmation modal with warning scale pop-in.</p>
+      </a>
+
+      <!-- Screen 8 -->
+      <a href="./08_mobile_dashboard_empty_state.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#33415C] text-white px-2 py-0.5 rounded">08</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Dashboard Empty State</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Clean empty ledger state with animated illustration and onboarding CTA.</p>
+      </a>
+
+      <!-- Screen 9 -->
+      <a href="./09_mobile_transactions_ledger.html" class="block p-5 bg-white rounded-2xl neo-border neo-shadow hover:-translate-y-1 transition-all motion-card group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-mono font-bold bg-[#33415C] text-white px-2 py-0.5 rounded">09</span>
+          <span class="text-xs font-bold text-[#48CAE4] group-hover:underline">Open Screen →</span>
+        </div>
+        <h3 class="font-extrabold text-base text-[#171717]">Transactions Ledger</h3>
+        <p class="text-xs text-[#171717]/70 mt-1 font-medium">Search bar, filter tabs, floating action button, and transaction rows.</p>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Motion Controller Script Integration -->
+  <script type="module" src="./motion-controller.js"></script>
+
+  <script type="module">
+    import { animateDashboardCards } from './motion-controller.js';
+
+    // Interactive button re-trigger
+    document.getElementById('retrigger-animations')?.addEventListener('click', () => {
+      animateDashboardCards();
+    });
+
+    // Reduced motion simulator toggle
+    const toggleBtn = document.getElementById('toggle-reduced-motion');
+    let isReduced = false;
+    toggleBtn?.addEventListener('click', () => {
+      isReduced = !isReduced;
+      if (isReduced) {
+        toggleBtn.textContent = 'Simulated ON (No Motion)';
+        toggleBtn.classList.remove('bg-[#F4F2EC]');
+        toggleBtn.classList.add('bg-[#FFA200]', 'text-black');
+      } else {
+        toggleBtn.textContent = 'System Default (Off)';
+        toggleBtn.classList.remove('bg-[#FFA200]', 'text-black');
+        toggleBtn.classList.add('bg-[#F4F2EC]');
+      }
+    });
+  </script>
+</body>
+</html>

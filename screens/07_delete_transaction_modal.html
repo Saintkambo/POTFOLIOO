@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-tertiary": "#ffffff", "on-secondary": "#ffffff", "on-secondary-fixed": "#3a0b00", "error-container": "#ffdad6", "surface-tint": "#234aeb", "inverse-primary": "#bac3ff", "surface-container-low": "#f6f3f2", "secondary-fixed": "#ffdbd0", "background": "#fcf9f8", "inverse-on-surface": "#f3f0ef", "surface-container-highest": "#e5e2e1", "on-secondary-fixed-variant": "#852400", "primary-fixed": "#dee1ff", "surface-bright": "#fcf9f8", "surface-variant": "#e5e2e1", "surface-container-lowest": "#ffffff", "tertiary-container": "#BFD200", "secondary-fixed-dim": "#ffb59e", "on-tertiary-fixed": "#002113", "tertiary": "#BFD200", "tertiary-fixed-dim": "#4edea3", "on-tertiary-container": "#83ffc6", "on-primary-fixed": "#001159", "outline-variant": "#c4c5d8", "inverse-surface": "#313030", "on-primary": "#ffffff", "primary-fixed-dim": "#bac3ff", "surface-container-high": "#eae7e7", "primary": "#33415C", "on-tertiary-fixed-variant": "#005236", "secondary": "#FFA200", "on-primary-container": "#e4e6ff", "surface-dim": "#dcd9d9", "error": "#ba1a1a", "on-surface-variant": "#444656", "primary-container": "#48CAE4", "on-primary-fixed-variant": "#0031c5", "on-surface": "#1c1b1b", "tertiary-fixed": "#6ffbbe", "on-error-container": "#93000a", "outline": "#747687", "surface": "#fcf9f8", "secondary-container": "#FFA200", "on-secondary-container": "#521300", "surface-container": "#f0eded", "on-background": "#1c1b1b", "on-error": "#ffffff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter": "1.5rem", "space-xl": "2rem", "margin": "2rem", "space-lg": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "1rem" }, fontFamily: { "title": ["Manrope"], "numeric-sm": ["Manrope"], "label-sm": ["Manrope"], "numeric-display": ["Manrope"], "display": ["Manrope"], "body-md": ["Manrope"], "body-sm": ["Manrope"], "label-md": ["Manrope"], "body-lg": ["Manrope"], "headline-md": ["Manrope"], "headline-lg": ["Manrope"], "numeric-md": ["Manrope"], "headline-sm": ["Manrope"] }, fontSize: { "title": ["1rem", { lineHeight: "1.5rem", letterSpacing: "0", fontWeight: "600" }], "numeric-sm": ["0.875rem", { lineHeight: "1.25rem", letterSpacing: "0", fontWeight: "600" }], "label-sm": ["0.6875rem", { lineHeight: "0.875rem", letterSpacing: "0.08em", fontWeight: "800" }], "numeric-display": ["2.25rem", { lineHeight: "2.75rem", letterSpacing: "-0.02em", fontWeight: "800" }], "display": ["3rem", { lineHeight: "3.5rem", letterSpacing: "-0.03em", fontWeight: "800" }], "body-md": ["0.875rem", { lineHeight: "1.375rem", letterSpacing: "0", fontWeight: "500" }], "body-sm": ["0.75rem", { lineHeight: "1.125rem", letterSpacing: "0.01em", fontWeight: "500" }], "label-md": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.06em", fontWeight: "700" }], "body-lg": ["1.125rem", { lineHeight: "1.75rem", letterSpacing: "-0.01em", fontWeight: "400" }], "headline-md": ["1.5rem", { lineHeight: "2rem", letterSpacing: "-0.015em", fontWeight: "700" }], "headline-lg": ["2rem", { lineHeight: "2.5rem", letterSpacing: "-0.02em", fontWeight: "800" }], "numeric-md": ["1rem", { lineHeight: "1.5rem", letterSpacing: "0", fontWeight: "700" }], "headline-sm": ["1.25rem", { lineHeight: "1.75rem", letterSpacing: "-0.01em", fontWeight: "700" }] } } } };</script><style>
+    :root {
+      --color-slate-navy: #33415C;
+      --color-vivid-amber: #FFA200;
+      --color-citron-lime: #BFD200;
+      --color-electric-sky: #48CAE4;
+      --color-blackstone: #171717;
+      --color-canvas: #FFFDF8;
+    }
+ ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Close or Back" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:text-primary active:bg-surface-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">close</span></button><h1 class="font-headline-sm text-headline-sm text-on-surface truncate">Edit Ledger Entry</h1></div><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface"><div class="flex flex-col w-full relative min-h-[calc(100vh-4rem)] items-center justify-center p-gutter select-none overflow-hidden">
+<!-- Blurred Faux Bookkeeping App Underlay Background -->
+<div aria-hidden="true" class="absolute inset-0 pointer-events-none opacity-40 blur-[2px] p-gutter flex flex-col gap-space-md">
+<div class="flex items-center justify-between p-space-md bg-surface-container rounded-xl">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-primary-container text-on-primary flex items-center justify-center text-xs font-bold">PT</span>
+<div class="w-32 h-4 bg-surface-variant rounded"></div>
+</div>
+<div class="w-20 h-6 bg-surface-container-highest rounded-full"></div>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="p-space-md bg-surface-container rounded-xl space-y-2">
+<div class="w-16 h-3 bg-surface-variant rounded"></div>
+<div class="w-24 h-6 bg-surface-container-highest rounded"></div>
+</div>
+<div class="p-space-md bg-surface-container rounded-xl space-y-2">
+<div class="w-16 h-3 bg-surface-variant rounded"></div>
+<div class="w-24 h-6 bg-surface-container-highest rounded"></div>
+</div>
+</div>
+<div class="bg-surface-container rounded-2xl p-space-md space-y-3">
+<div class="flex justify-between items-center pb-space-xs">
+<div class="w-28 h-4 bg-surface-variant rounded"></div>
+<div class="w-16 h-4 bg-surface-variant rounded"></div>
+</div>
+<div class="h-10 bg-surface-container-low rounded-lg flex items-center px-space-sm justify-between">
+<div class="w-36 h-3 bg-surface-variant rounded"></div>
+<div class="w-12 h-3 bg-surface-variant rounded"></div>
+</div>
+<div class="h-10 bg-primary-fixed/30 rounded-lg flex items-center px-space-sm justify-between">
+<div class="w-40 h-3 bg-primary rounded"></div>
+<div class="w-14 h-3 bg-primary rounded"></div>
+</div>
+<div class="h-10 bg-surface-container-low rounded-lg flex items-center px-space-sm justify-between">
+<div class="w-32 h-3 bg-surface-variant rounded"></div>
+<div class="w-12 h-3 bg-surface-variant rounded"></div>
+</div>
+</div>
+</div>
+<!-- Modal Dimmed Backdrop -->
+<div class="absolute inset-0 bg-on-surface/60 backdrop-blur-sm z-10 transition-opacity duration-200"></div>
+<!-- Tactile Neo-Brutalist Delete Dialog Card -->
+<section aria-describedby="dialog-desc" aria-labelledby="dialog-title" aria-modal="true" class="relative z-20 w-full max-w-[340px] max-h-[440px] bg-surface-container-lowest rounded-2xl p-6 flex flex-col items-center justify-between text-center shadow-[4px_4px_0px_#171717] outline outline-2 outline-on-surface transition-all duration-150 animate-in fade-in zoom-in-95" role="alertdialog">
+<!-- Dismiss Cross Button (Tactile micro affordance) -->
+<button aria-label="Close dialog" class="absolute top-3 right-3 w-8 h-8 rounded-lg bg-surface-container-low text-on-surface flex items-center justify-center outline outline-2 outline-on-surface shadow-[2px_2px_0px_#171717] hover:shadow-[3px_3px_0px_#171717] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer" onclick="history.back()" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+<div class="flex flex-col items-center w-full">
+<!-- Top Centered Icon Tile -->
+<div class="w-12 h-12 rounded-lg bg-secondary-fixed flex items-center justify-center outline outline-2 outline-on-surface shadow-[2px_2px_0px_#171717] mb-space-sm">
+<span class="material-symbols-outlined text-secondary text-[26px]">delete</span>
+</div>
+<!-- Headline & Subtitle -->
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight mt-space-xs mb-1" id="dialog-title">
+        Delete Transaction?
+      </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed px-1 mb-space-sm" id="dialog-desc">
+        Removing this item recalculates your net ledger total immediately.
+      </p>
+<!-- Neo-brutalist Transaction Card Detail Pill -->
+<div class="w-full bg-surface-container-low rounded-xl p-space-sm outline outline-2 outline-on-surface text-left flex flex-col gap-1.5 mb-space-sm">
+<div class="flex items-center justify-between gap-1">
+<span class="font-title text-body-md text-on-surface font-bold truncate max-w-[170px]" title="Client Retainer - Acme Corp">
+            Client Retainer - Acme Corp
+          </span>
+<span class="font-numeric-sm text-numeric-sm font-extrabold text-primary bg-primary-fixed px-1.5 py-0.5 rounded outline outline-1 outline-primary/40 shrink-0 tabular-nums">
+            +$1,500.00
+          </span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-md text-label-md">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">event</span>
+            Nov 02, 2026
+          </span>
+<span class="bg-surface-container-highest px-1.5 py-0.2 rounded font-bold uppercase tracking-wider text-[10px] text-on-surface-variant">
+            Income
+          </span>
+</div>
+</div>
+<!-- Warning Callout Note -->
+<p class="font-body-sm text-body-sm text-secondary font-medium flex items-start gap-1 text-left px-0.5 leading-snug mb-space-md">
+<span class="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">warning</span>
+<span>Permanently purged from your offline local storage. This action cannot be reversed.</span>
+</p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-space-xs w-full">
+<!-- Primary Destructive CTA -->
+<button class="w-full h-12 bg-secondary text-on-secondary font-title text-body-md font-bold rounded-xl flex items-center justify-center gap-space-xs outline outline-2 outline-on-surface shadow-[4px_4px_0px_#171717] hover:shadow-[5px_5px_0px_#171717] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all cursor-pointer" id="confirm-delete-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">delete_forever</span>
+<span>Yes, Delete Entry</span>
+</button>
+<!-- Secondary Dismiss CTA -->
+<button class="w-full h-12 bg-surface-container-lowest text-on-surface font-title text-body-md font-bold rounded-xl flex items-center justify-center outline outline-2 outline-on-surface shadow-[3px_3px_0px_#171717] hover:shadow-[4px_4px_0px_#171717] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer" onclick="history.back()" type="button">
+<span>Keep Transaction</span>
+</button>
+</div>
+<!-- Micro Reassurance / Footer Badge -->
+<div class="mt-space-sm pt-space-xs flex items-center justify-center gap-1 font-label-sm text-label-sm text-on-surface-variant/80">
+<span class="material-symbols-outlined text-[13px] text-tertiary">lock</span>
+<span>IndexedDB Local Bookkeeping • Zero Cloud Sync</span>
+</div>
+</section>
+</div>
+<script>
+  // Interactive micro-feedback on confirmation click
+  document.getElementById('confirm-delete-btn')?.addEventListener('click', function(e) {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span><span>Purging Ledger...</span>';
+    setTimeout(() => {
+      if (window.history.length > 1) {
+        window.history.back();
+      }
+    }, 600);
+  });
+</script>
+<!-- Official Motion Animation Controller (Vanilla JS ES Module) -->
+<script type="module" src="./motion-controller.js"></script>
+</main></body></html>

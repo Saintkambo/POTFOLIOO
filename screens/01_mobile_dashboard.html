@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>POTFOLIOO - Offline Bookkeeping Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-slate-navy: #33415C;
+      --color-vivid-amber: #FFA200;
+      --color-citron-lime: #BFD200;
+      --color-electric-sky: #48CAE4;
+      --color-blackstone: #171717;
+      --color-canvas: #FFFDF8;
+    }
+
+    body {
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #FFFDF8;
+      color: #171717;
+      -webkit-font-smoothing: antialiased;
+    }
+    .neo-shadow-sm {
+      box-shadow: 2px 2px 0px #171717;
+    }
+    .neo-shadow {
+      box-shadow: 3px 3px 0px #171717;
+    }
+    .neo-shadow-lg {
+      box-shadow: 4px 4px 0px #171717;
+    }
+    .neo-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #171717;
+    }
+    .tabular-numbers {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Hide scrollbar for clean mobile feel */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#FFFDF8] text-[#171717] min-h-screen flex justify-center selection:bg-[#48CAE4] selection:text-white">
+
+  <!-- Mobile Device Frame Container (390px fixed width simulated mobile experience) -->
+  <div class="w-full max-w-[390px] min-h-screen bg-[#FFFDF8] flex flex-col relative pb-36 border-x border-[#171717]/10 shadow-2xl">
+    
+    <!-- Top System & Status Header -->
+    <header class="pt-4 px-4 pb-3 sticky top-0 bg-[#FFFDF8]/95 backdrop-blur-md z-30 border-b border-[#171717]/10">
+      <div class="flex items-start justify-between">
+        <!-- Brand & Book Status Info -->
+        <div>
+          <div class="flex items-center space-x-1.5 cursor-pointer group">
+            <h1 class="text-[20px] font-extrabold tracking-tight text-[#171717] group-hover:text-[#48CAE4] transition-colors">My Book</h1>
+            <button aria-label="Edit book name" class="p-1 rounded hover:bg-black/5 transition-colors text-[#171717]/70">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Offline Status Pill Badge -->
+          <div class="inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full bg-white border border-[#171717] neo-shadow-sm text-[11px] font-semibold text-[#171717]">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Local Storage • Offline Ready</span>
+          </div>
+        </div>
+
+        <!-- Settings Gear Icon Button -->
+        <button aria-label="Settings" class="w-[44px] h-[44px] bg-white border-2 border-[#171717] rounded-xl flex items-center justify-center neo-shadow neo-btn transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#171717]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Dashboard Content -->
+    <main class="px-4 pt-3 space-y-4 flex-1">
+
+      <!-- 2. Month Switcher Bar -->
+      <section class="flex flex-col items-center">
+        <div class="w-full bg-white border-2 border-[#171717] rounded-xl px-3 py-2 flex items-center justify-between neo-shadow-sm">
+          <button aria-label="Previous month" class="w-8 h-8 rounded-lg bg-[#FFFDF8] border border-[#171717] flex items-center justify-center font-bold text-sm hover:bg-black/5 neo-btn transition-all">
+            ←
+          </button>
+          <div class="text-center">
+            <span class="text-[15px] font-extrabold tracking-tight text-[#171717]">November 2026</span>
+          </div>
+          <button aria-label="Next month" class="w-8 h-8 rounded-lg bg-[#FFFDF8] border border-[#171717] flex items-center justify-center font-bold text-sm hover:bg-black/5 neo-btn transition-all">
+            →
+          </button>
+        </div>
+        <button class="mt-1 text-[11px] font-bold text-[#48CAE4] hover:underline uppercase tracking-wider">
+          Current Month
+        </button>
+      </section>
+
+      <!-- 3. Net Profit Hero Card (Visual Anchor) -->
+      <section class="bg-white border-2 border-[#171717] rounded-2xl p-4 neo-shadow-lg relative overflow-hidden">
+        <!-- Card Top Row -->
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold tracking-wider text-[#171717]/60 uppercase">NET CASH FLOW</span>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EEF9FD] border border-[#48CAE4]/30 text-[12px] font-bold text-[#48CAE4]">
+            <span class="text-[9px]">●</span> Net Profit
+          </div>
+        </div>
+
+        <!-- Center Amount -->
+        <div class="my-3">
+          <div class="text-[32px] font-extrabold tracking-tight text-[#171717] tabular-numbers leading-none">
+            +TSh 3,420,000
+          </div>
+        </div>
+
+        <!-- Card Bottom Meta -->
+        <div class="pt-2 border-t border-[#171717]/10 flex items-center justify-between text-[12px] text-[#171717]/70 font-medium">
+          <span>Based on 14 transactions this month</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        </div>
+      </section>
+
+      <!-- 4. Income & Expenses Summary Duo -->
+      <section class="grid grid-cols-2 gap-3">
+        <!-- Card A: Income -->
+        <div class="bg-white border-2 border-[#171717] rounded-xl p-3 neo-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-10 h-10 rounded-lg bg-[#BFD200] border border-[#171717] flex items-center justify-center neo-shadow-sm text-[#171717]">
+              <!-- Down Arrow (Income) -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <polyline points="19 12 12 19 5 12"/>
+              </svg>
+            </div>
+            <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-[#F7FAE4] text-[#171717] border border-[#BFD200]/40">8 entries</span>
+          </div>
+          <span class="text-[12px] font-bold text-[#171717]/60 block">Total Income</span>
+          <span class="text-[16px] font-extrabold text-[#171717] tabular-numbers leading-tight block mt-0.5">TSh 5,650,000</span>
+        </div>
+
+        <!-- Card B: Expense -->
+        <div class="bg-white border-2 border-[#171717] rounded-xl p-3 neo-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-10 h-10 rounded-lg bg-[#FFA200] border border-[#171717] flex items-center justify-center neo-shadow-sm text-[#171717]">
+              <!-- Up Arrow (Expense) -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"/>
+                <polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </div>
+            <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-[#FFF3DF] text-[#171717] border border-[#FFA200]/40">6 entries</span>
+          </div>
+          <span class="text-[12px] font-bold text-[#171717]/60 block">Total Expenses</span>
+          <span class="text-[16px] font-extrabold text-[#171717] tabular-numbers leading-tight block mt-0.5">TSh 2,230,000</span>
+        </div>
+      </section>
+
+      <!-- 5. Recent Activity Section -->
+      <section class="space-y-2.5 pt-1">
+        <div class="flex items-center justify-between">
+          <h2 class="text-[15px] font-extrabold text-[#171717] tracking-tight">Recent Transactions</h2>
+          <button class="text-[12px] font-bold text-[#48CAE4] hover:underline flex items-center gap-0.5">
+            See all (14) →
+          </button>
+        </div>
+
+        <!-- Transaction List -->
+        <div class="space-y-2.5">
+
+          <!-- Row 1: Income -->
+          <div class="bg-white border-2 border-[#171717] rounded-xl p-3 neo-shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-[#BFD200] border border-[#171717] flex items-center justify-center text-[#171717] shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <polyline points="19 12 12 19 5 12"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[13px] font-extrabold text-[#171717] leading-snug">Client Retainer - Acme Corp</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-[11px] font-medium text-[#171717]/60">Nov 02</span>
+                  <span class="text-[10px] text-[#171717]/30">•</span>
+                  <span class="text-[11px] font-medium text-[#171717]/80 bg-[#FFFDF8] px-1.5 py-0.2 rounded border border-[#171717]/10">Consulting</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-[14px] font-extrabold text-[#171717] tabular-numbers block">+TSh 1,500,000</span>
+              <span class="inline-block mt-0.5 px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#F7FAE4] text-[#171717] border border-[#BFD200]">Income</span>
+            </div>
+          </div>
+
+          <!-- Row 2: Expense -->
+          <div class="bg-white border-2 border-[#171717] rounded-xl p-3 neo-shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-[#FFA200] border border-[#171717] flex items-center justify-center text-[#171717] shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"/>
+                  <polyline points="5 12 12 5 19 12"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[13px] font-extrabold text-[#171717] leading-snug">Office Supplies & Paper</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-[11px] font-medium text-[#171717]/60">Nov 01</span>
+                  <span class="text-[10px] text-[#171717]/30">•</span>
+                  <span class="text-[11px] font-medium text-[#171717]/80 bg-[#FFFDF8] px-1.5 py-0.2 rounded border border-[#171717]/10">Supplies</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-[14px] font-extrabold text-[#171717] tabular-numbers block">-TSh 84,500</span>
+              <span class="inline-block mt-0.5 px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#FFF3DF] text-[#171717] border border-[#FFA200]">Expense</span>
+            </div>
+          </div>
+
+          <!-- Row 3: Expense -->
+          <div class="bg-white border-2 border-[#171717] rounded-xl p-3 neo-shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-[#FFA200] border border-[#171717] flex items-center justify-center text-[#171717] shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"/>
+                  <polyline points="5 12 12 5 19 12"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[13px] font-extrabold text-[#171717] leading-snug">High-Speed Internet Bill</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-[11px] font-medium text-[#171717]/60">Oct 31</span>
+                  <span class="text-[10px] text-[#171717]/30">•</span>
+                  <span class="text-[11px] font-medium text-[#171717]/80 bg-[#FFFDF8] px-1.5 py-0.2 rounded border border-[#171717]/10">Utilities</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-[14px] font-extrabold text-[#171717] tabular-numbers block">-TSh 120,000</span>
+              <span class="inline-block mt-0.5 px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#FFF3DF] text-[#171717] border border-[#FFA200]">Expense</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 6. Floating Persistent Action Button & Bottom Navigation -->
+    <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-40 px-4 pb-2 pointer-events-none">
+      
+      <!-- Primary Thumb CTA Button -->
+      <div class="pointer-events-auto mb-2">
+        <button class="w-full bg-[#33415C] hover:bg-[#283348] active:bg-[#1F2737] text-white font-extrabold py-3.5 px-4 rounded-xl border-2 border-[#171717] neo-shadow-lg neo-btn flex items-center justify-center gap-2 tracking-wide text-[15px] transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>Add Transaction</span>
+        </button>
+      </div>
+
+      <!-- Bottom Nav Bar (64px height, white surface, 2px Blackstone top border) -->
+      <nav class="pointer-events-auto bg-white border-2 border-[#171717] rounded-2xl h-[64px] neo-shadow flex items-center justify-around px-2">
+        
+        <!-- 1. Dashboard (Active) -->
+        <button class="flex flex-col items-center justify-center w-16 py-1 text-[#48CAE4] font-extrabold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="9" x="3" y="3" rx="1"/>
+            <rect width="7" height="5" x="14" y="3" rx="1"/>
+            <rect width="7" height="9" x="14" y="12" rx="1"/>
+            <rect width="7" height="5" x="3" y="16" rx="1"/>
+          </svg>
+          <span class="text-[10px] mt-0.5 tracking-tight font-bold">Dashboard</span>
+        </button>
+
+        <!-- 2. Transactions -->
+        <button class="flex flex-col items-center justify-center w-16 py-1 text-[#171717] hover:text-[#48CAE4] transition-colors font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"/>
+            <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          <span class="text-[10px] mt-0.5 tracking-tight">Transactions</span>
+        </button>
+
+        <!-- 3. Reports -->
+        <button class="flex flex-col items-center justify-center w-16 py-1 text-[#171717] hover:text-[#48CAE4] transition-colors font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span class="text-[10px] mt-0.5 tracking-tight">Reports</span>
+        </button>
+
+        <!-- 4. Settings -->
+        <button class="flex flex-col items-center justify-center w-16 py-1 text-[#171717] hover:text-[#48CAE4] transition-colors font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span class="text-[10px] mt-0.5 tracking-tight">Settings</span>
+        </button>
+
+      </nav>
+    </div>
+
+  </div>
+
+  <!-- Official Motion Animation Controller (Vanilla JS ES Module) -->
+  <script type="module" src="./motion-controller.js"></script>
+</body>
+</html>

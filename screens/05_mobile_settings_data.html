@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>
+    :root {
+      --color-slate-navy: #33415C;
+      --color-vivid-amber: #FFA200;
+      --color-citron-lime: #BFD200;
+      --color-electric-sky: #48CAE4;
+      --color-blackstone: #171717;
+      --color-canvas: #FFFDF8;
+    }
+::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-dim": "#dcd9d9", "on-surface": "#1c1b1b", "surface-container-highest": "#e5e2e1", "surface-container": "#f0eded", "inverse-surface": "#313030", "on-primary-fixed-variant": "#0031c5", "primary-fixed-dim": "#bac3ff", "surface-container-high": "#eae7e7", "primary-container": "#48CAE4", "tertiary-container": "#BFD200", "on-secondary-container": "#521300", "surface-container-low": "#f6f3f2", "secondary-fixed-dim": "#ffb59e", "on-error-container": "#93000a", "surface-tint": "#234aeb", "outline-variant": "#c4c5d8", "secondary-container": "#FFA200", "on-tertiary-fixed": "#002113", "on-secondary": "#ffffff", "background": "#fcf9f8", "surface": "#fcf9f8", "on-primary": "#ffffff", "on-background": "#1c1b1b", "outline": "#747687", "on-tertiary-fixed-variant": "#005236", "error-container": "#ffdad6", "on-primary-container": "#e4e6ff", "inverse-primary": "#bac3ff", "surface-container-lowest": "#ffffff", "tertiary-fixed-dim": "#4edea3", "on-error": "#ffffff", "surface-variant": "#e5e2e1", "on-tertiary": "#ffffff", "surface-bright": "#fcf9f8", "secondary": "#FFA200", "on-secondary-fixed-variant": "#852400", "inverse-on-surface": "#f3f0ef", "error": "#ba1a1a", "on-surface-variant": "#444656", "primary-fixed": "#dee1ff", "on-tertiary-container": "#83ffc6", "on-secondary-fixed": "#3a0b00", "tertiary-fixed": "#6ffbbe", "tertiary": "#BFD200", "secondary-fixed": "#ffdbd0", "on-primary-fixed": "#001159", "primary": "#33415C" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter": "1.5rem", "space-xl": "2rem", "space-xs": "0.25rem", "margin": "2rem", "space-lg": "1.5rem", "space-sm": "0.5rem", "space-md": "1rem" }, fontFamily: { "label-md": ["Manrope"], "numeric-display": ["Manrope"], "headline-lg": ["Manrope"], "headline-md": ["Manrope"], "numeric-md": ["Manrope"], "body-sm": ["Manrope"], "display": ["Manrope"], "headline-sm": ["Manrope"], "label-sm": ["Manrope"], "body-lg": ["Manrope"], "title": ["Manrope"], "numeric-sm": ["Manrope"], "body-md": ["Manrope"] }, fontSize: { "label-md": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.06em", fontWeight: "700" }], "numeric-display": ["2.25rem", { lineHeight: "2.75rem", letterSpacing: "-0.02em", fontWeight: "800" }], "headline-lg": ["2rem", { lineHeight: "2.5rem", letterSpacing: "-0.02em", fontWeight: "800" }], "headline-md": ["1.5rem", { lineHeight: "2rem", letterSpacing: "-0.015em", fontWeight: "700" }], "numeric-md": ["1rem", { lineHeight: "1.5rem", letterSpacing: "0", fontWeight: "700" }], "body-sm": ["0.75rem", { lineHeight: "1.125rem", letterSpacing: "0.01em", fontWeight: "500" }], "display": ["3rem", { lineHeight: "3.5rem", letterSpacing: "-0.03em", fontWeight: "800" }], "headline-sm": ["1.25rem", { lineHeight: "1.75rem", letterSpacing: "-0.01em", fontWeight: "700" }], "label-sm": ["0.6875rem", { lineHeight: "0.875rem", letterSpacing: "0.08em", fontWeight: "800" }], "body-lg": ["1.125rem", { lineHeight: "1.75rem", letterSpacing: "-0.01em", fontWeight: "400" }], "title": ["1rem", { lineHeight: "1.5rem", letterSpacing: "0", fontWeight: "600" }], "numeric-sm": ["0.875rem", { lineHeight: "1.25rem", letterSpacing: "0", fontWeight: "600" }], "body-md": ["0.875rem", { lineHeight: "1.375rem", letterSpacing: "0", fontWeight: "500" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-primary text-[24px]">account_balance_wallet</span><h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight uppercase font-extrabold">Transactions</h1></div><div class="flex items-center gap-space-sm"><button aria-label="Search and Filter" class="w-11 h-11 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface hover:bg-surface-container active:translate-x-0.5 active:translate-y-0.5 transition-all"><span class="material-symbols-outlined text-[20px]">tune</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-24 bg-surface min-h-screen px-gutter"><div class="flex flex-col w-full pb-8 space-y-5">
+<!-- Top Banner & Subtitle Area -->
+<div class="flex flex-col space-y-2 pt-1">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-tight font-extrabold flex items-center gap-1.5">
+<span>Settings &amp; Data</span>
+</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium mt-0.5">
+          Manage your book and offline backups
+        </p>
+</div>
+<!-- Offline Status Pill -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-lowest rounded-full shadow-[2px_2px_0px_#171717] ring-1 ring-on-surface">
+<span class="w-2 h-2 rounded-full bg-[#12B76A] animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase text-on-surface tracking-wider font-extrabold">Offline • Private</span>
+</div>
+</div>
+</div>
+<!-- Book Configuration Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-[4px_4px_0px_#171717] ring-2 ring-[#171717] flex flex-col space-y-4">
+<div class="flex items-center justify-between pb-3 border-b-2 border-[#171717]">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-on-surface ring-1 ring-[#171717] shadow-[1px_1px_0px_#171717]">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+</div>
+<h3 class="font-title text-title text-on-surface font-bold tracking-tight">Book Configuration</h3>
+</div>
+<span class="font-label-sm text-label-sm uppercase bg-surface-container text-on-surface-variant px-2 py-0.5 rounded font-bold">Ledger #01</span>
+</div>
+<!-- Field 1: Book Name -->
+<div class="flex flex-col space-y-1.5">
+<label class="font-label-sm text-label-sm uppercase text-on-surface font-bold tracking-wider" for="book-name">
+        Book Name
+      </label>
+<div class="flex items-center gap-2">
+<div class="relative flex-1">
+<input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md font-bold px-3 py-2 rounded-xl ring-2 ring-[#171717] focus:outline-none focus:ring-primary shadow-[inset_0px_2px_4px_rgba(0,0,0,0.05)]" id="book-name" type="text" value="My Book"/>
+</div>
+<button class="h-10 px-3.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md uppercase font-extrabold rounded-xl ring-2 ring-[#171717] shadow-[2px_2px_0px_#171717] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center gap-1 shrink-0" onclick="triggerMicroFeedback(this, 'Saved!')" type="button">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Rename</span>
+</button>
+</div>
+</div>
+<!-- Field 2: Book Currency -->
+<div class="flex flex-col space-y-1.5">
+<label class="font-label-sm text-label-sm uppercase text-on-surface font-bold tracking-wider" for="book-currency">
+        Ledger Currency
+      </label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-low text-on-surface font-body-md text-body-md font-bold px-3.5 py-2.5 rounded-xl ring-2 ring-[#171717] shadow-[2px_2px_0px_#171717] focus:outline-none pr-10" id="book-currency">
+<option selected="">TZS - Tanzanian Shilling (TSh)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface text-[20px]">
+          unfold_more
+        </span>
+</div>
+</div>
+<!-- Warning Callout Box inside Card -->
+<div class="bg-[#FFF3DF] rounded-xl p-3 ring-1 ring-[#FFA200] flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[#FFA200] text-[20px] shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">
+        warning
+      </span>
+<p class="font-body-sm text-body-sm text-[#852400] leading-snug font-medium">
+<span class="font-bold">Notice:</span> Changing currency updates future display only. Existing recorded amounts are not converted.
+      </p>
+</div>
+</div>
+<!-- Backup & Data Portability Centerpiece Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-[4px_4px_0px_#171717] ring-2 ring-[#171717] flex flex-col space-y-4">
+<!-- Header -->
+<div class="flex items-center justify-between pb-3 border-b-2 border-[#171717]">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center ring-1 ring-[#171717] shadow-[1px_1px_0px_#171717]">
+<span class="material-symbols-outlined text-[18px]">cloud_off</span>
+</div>
+<h3 class="font-title text-title text-on-surface font-bold tracking-tight">Data Backup &amp; Migration</h3>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-[#12B76A]"></span>
+</div>
+<!-- Description -->
+<p class="font-body-md text-body-md text-on-surface-variant font-medium leading-relaxed">
+      All bookkeeping records are stored exclusively in your device browser. To transfer to another phone or computer, export a backup file.
+    </p>
+<!-- Visual Representation: Vault & Ledger Flow -->
+<div class="bg-surface-container-low rounded-xl p-3 ring-1 ring-[#171717] flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-lg bg-surface-container-lowest flex items-center justify-center ring-1 ring-[#171717] text-primary">
+<span class="material-symbols-outlined text-[20px]">database</span>
+</div>
+<div>
+<p class="font-label-md text-label-md uppercase text-on-surface font-extrabold tracking-wider">Local IndexedDB</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">14 Transactions Recorded</p>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-block px-2 py-0.5 bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-bold rounded ring-1 ring-primary/30">
+          v1.0 Syncable
+        </span>
+</div>
+</div>
+<!-- Action Buttons Stack -->
+<div class="flex flex-col space-y-3 pt-1">
+<!-- Button 1: Export JSON -->
+<div class="flex flex-col space-y-1">
+<button class="w-full h-12 bg-primary text-on-primary font-headline-sm text-headline-sm uppercase tracking-wider rounded-xl ring-2 ring-[#171717] shadow-[4px_4px_0px_#171717] hover:shadow-[5px_5px_0px_#171717] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 font-extrabold cursor-pointer" id="btn-export-json" onclick="handleExportJson(this)" type="button">
+<span class="material-symbols-outlined text-[22px]">download</span>
+<span>Export JSON Backup</span>
+</button>
+<span class="font-body-sm text-body-sm text-on-surface-variant px-1 font-medium">
+          Downloads a full versioned backup file (complete database state)
+        </span>
+</div>
+<!-- Button 2: Restore JSON Backup -->
+<div class="flex flex-col space-y-1">
+<label class="w-full h-11 bg-surface-container-lowest text-on-surface font-title text-title uppercase tracking-wide rounded-xl ring-2 ring-[#171717] shadow-[3px_3px_0px_#171717] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all flex items-center justify-center gap-2 font-bold cursor-pointer" for="restore-file-input">
+<span class="material-symbols-outlined text-[20px] text-primary">upload_file</span>
+<span>Restore Backup</span>
+</label>
+<input accept=".json" class="hidden" id="restore-file-input" onchange="handleRestoreFile(this)" type="file"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant px-1 font-medium">
+          Restores records from an existing backup file
+        </span>
+</div>
+<!-- Button 3: Export CSV -->
+<div class="pt-1">
+<button class="w-full py-2.5 px-3 bg-surface-container text-on-surface font-label-md text-label-md uppercase tracking-wider rounded-xl ring-2 ring-[#171717] shadow-[2px_2px_0px_#171717] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-2 font-extrabold cursor-pointer" onclick="triggerMicroFeedback(this, 'CSV Generated!')" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#005C3E]">table_view</span>
+<span>Export Transactions as CSV</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Danger / Overwrite Notice -->
+<div class="bg-[#FFF4F2] rounded-2xl p-3.5 ring-2 ring-[#B42318] shadow-[3px_3px_0px_#B42318] flex items-start gap-3">
+<div class="w-7 h-7 rounded-lg bg-[#FFDAD6] text-[#B42318] flex items-center justify-center shrink-0 ring-1 ring-[#B42318]">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">
+        priority_high
+      </span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md uppercase text-[#B42318] font-extrabold tracking-wide mb-0.5">
+        Destructive Action Alert
+      </p>
+<p class="font-body-sm text-body-sm text-[#93000A] leading-snug font-medium">
+        Restoring a backup will <span class="font-bold underline">overwrite</span> current local storage entries. Always take an export first.
+      </p>
+</div>
+</div>
+<!-- Storage & Privacy Info Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-[4px_4px_0px_#171717] ring-2 ring-[#171717] flex flex-col space-y-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-[#E6F8F0] text-[#007751] flex items-center justify-center ring-1 ring-[#171717] shadow-[1px_1px_0px_#171717]">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">
+          lock
+        </span>
+</div>
+<div>
+<h4 class="font-title text-title text-on-surface font-extrabold">100% Offline &amp; Private</h4>
+<span class="font-label-sm text-label-sm text-[#007751] font-bold uppercase tracking-wider">Zero Cloud Leakage</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium leading-relaxed bg-surface-container-low p-2.5 rounded-xl ring-1 ring-[#171717]/15">
+      No accounts, no telemetry, no cloud storage. Total records: <span class="font-bold text-on-surface">14 transactions</span> • Database version: <span class="font-bold text-on-surface">v1.0</span> • Engine: <span class="font-bold text-on-surface">IndexedDB Local Storage</span>.
+    </p>
+<div class="flex items-center justify-between text-on-surface-variant pt-1 border-t border-surface-container-high">
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm uppercase font-bold tracking-wider">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+<span>Last manual backup:</span>
+</div>
+<span class="font-label-sm text-label-sm font-extrabold uppercase px-2 py-0.5 rounded bg-surface-container text-on-surface" id="last-backup-stamp">
+        Never
+      </span>
+</div>
+</div>
+<!-- Micro-dialog Toast Notification Host -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-[350px] bg-on-surface text-surface px-4 py-3 rounded-xl ring-2 ring-[#171717] shadow-[4px_4px_0px_#171717] flex items-center justify-between transition-all duration-300 opacity-0 pointer-events-none translate-y-4 z-50" id="toast-banner">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#12B76A] text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-sm text-body-sm font-bold text-surface" id="toast-message">Action completed</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase bg-surface/20 px-1.5 py-0.5 rounded text-surface">OK</span>
+</div>
+</div>
+<script>
+  function showToast(msg) {
+    var toast = document.getElementById('toast-banner');
+    var label = document.getElementById('toast-message');
+    if (!toast || !label) return;
+    label.textContent = msg;
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    setTimeout(function() {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+    }, 2500);
+  }
+
+  function handleExportJson(btn) {
+    var originalHTML = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span><span>Packing Data...</span>';
+    setTimeout(function() {
+      btn.innerHTML = originalHTML;
+      var now = new Date();
+      var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      var stampEl = document.getElementById('last-backup-stamp');
+      if (stampEl) {
+        stampEl.textContent = 'Today at ' + timeStr;
+        stampEl.classList.remove('bg-surface-container', 'text-on-surface');
+        stampEl.classList.add('bg-[#E6F8F0]', 'text-[#007751]', 'ring-1', 'ring-[#007751]');
+      }
+      showToast('potfolioo-backup.json ready');
+    }, 600);
+  }
+
+  function handleRestoreFile(input) {
+    if (input.files && input.files[0]) {
+      var fileName = input.files[0].name;
+      showToast('Restored from ' + fileName);
+      input.value = '';
+    }
+  }
+
+  function triggerMicroFeedback(elem, text) {
+    var originalText = elem.innerText;
+    showToast(text);
+  }
+</script>
+<!-- Official Motion Animation Controller (Vanilla JS ES Module) -->
+<script type="module" src="./motion-controller.js"></script>
+</main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-bold"><div class="flex justify-around items-center h-20 px-space-sm"><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-12 text-on-surface-variant hover:text-on-surface transition-all" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[24px]">grid_view</span><span class="font-label-sm text-label-sm uppercase tracking-wider">Dashboard</span></a><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-12 text-on-surface-variant hover:text-on-surface transition-all" data-path="transactions" href="#"><span class="material-symbols-outlined text-[24px]">receipt_long</span><span class="font-label-sm text-label-sm uppercase tracking-wider">Ledger</span></a><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-12 text-on-surface-variant hover:text-on-surface transition-all" data-path="reports" href="#"><span class="material-symbols-outlined text-[24px]">bar_chart</span><span class="font-label-sm text-label-sm uppercase tracking-wider">Reports</span></a><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-12 text-on-surface-variant hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined text-[24px]">settings</span><span class="font-label-sm text-label-sm uppercase tracking-wider">Settings</span></a></div></nav></body></html>

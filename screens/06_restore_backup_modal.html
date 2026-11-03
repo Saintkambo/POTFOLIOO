@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POTFOLIOO - Confirm Ledger Restore Modal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            blackstone: '#171717',
+            canvas: '#FFFDF8',
+            royalBlue: '#3155F5',
+            nitroOrange: '#FFA200',
+            dangerRed: '#B42318',
+          },
+          boxShadow: {
+            'brutal-modal': '6px 6px 0px #171717',
+            'brutal-btn': '4px 4px 0px #171717',
+            'brutal-btn-sm': '3px 3px 0px #171717',
+            'brutal-card': '4px 4px 0px #171717',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --color-slate-navy: #33415C;
+      --color-vivid-amber: #FFA200;
+      --color-citron-lime: #BFD200;
+      --color-electric-sky: #48CAE4;
+      --color-blackstone: #171717;
+      --color-canvas: #FFFDF8;
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="bg-black/60 min-h-screen w-full flex items-center justify-center p-4 relative antialiased selection:bg-[#48CAE4] selection:text-white">
+
+  <!-- Background App Preview (Dimmed & Blurred for realistic backdrop feel) -->
+  <div class="fixed inset-0 pointer-events-none -z-10 flex items-center justify-center filter blur-[2px] opacity-40 select-none overflow-hidden" aria-hidden="true">
+    <div class="w-[390px] h-[844px] bg-[#FFFDF8] rounded-[24px] border-2 border-[#171717] p-4 flex flex-col justify-between">
+      <div class="space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b-2 border-[#171717]">
+          <div class="h-6 w-32 bg-[#171717]/20 rounded"></div>
+          <div class="h-7 w-7 rounded-full bg-[#33415C]"></div>
+        </div>
+        <div class="h-28 rounded-xl border-2 border-[#171717] bg-white p-3 space-y-2 shadow-[4px_4px_0px_#171717]">
+          <div class="h-4 w-24 bg-[#171717]/20 rounded"></div>
+          <div class="h-8 w-full bg-[#171717]/10 rounded"></div>
+        </div>
+        <div class="h-56 rounded-xl border-2 border-[#171717] bg-white p-3 space-y-3 shadow-[4px_4px_0px_#171717]">
+          <div class="h-4 w-36 bg-[#171717]/20 rounded"></div>
+          <div class="h-10 w-full bg-[#33415C] rounded"></div>
+          <div class="h-10 w-full bg-white border border-[#171717] rounded"></div>
+        </div>
+      </div>
+      <div class="h-14 border-t-2 border-[#171717] flex justify-around items-center">
+        <div class="w-8 h-8 rounded bg-[#171717]/20"></div>
+        <div class="w-8 h-8 rounded bg-[#171717]/20"></div>
+        <div class="w-8 h-8 rounded bg-[#171717]/20"></div>
+        <div class="w-8 h-8 rounded bg-[#33415C]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Dialog Container (Target Dimensions: ~360px wide, heavy neo-brutalist styling) -->
+  <div class="w-full max-w-[360px] bg-white border-2 border-[#171717] rounded-[16px] shadow-[6px_6px_0px_#171717] overflow-hidden flex flex-col z-20 transition-all duration-200" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    
+    <!-- Top Decorative Status Strip -->
+    <div class="h-2 bg-[#FFA200] w-full border-b-2 border-[#171717]"></div>
+
+    <!-- Modal Header -->
+    <div class="px-5 pt-4 pb-3 flex items-start justify-between gap-3 border-b border-[#171717]/15">
+      <div class="flex items-center gap-3">
+        <!-- Warning Icon Tile (44x44px, Nitro Orange, white exclamation, 2px border) -->
+        <div class="w-[44px] h-[44px] shrink-0 bg-[#FFA200] border-2 border-[#171717] rounded-xl flex items-center justify-center shadow-[2px_2px_0px_#171717]">
+          <svg class="w-6 h-6 text-white stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <span class="inline-block px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#FFF3DF] text-[#FFA200] border border-[#FFA200]/40 rounded mb-0.5">Database Overwrite</span>
+          <h2 id="modal-title" class="text-[17px] font-extrabold text-[#171717] tracking-tight leading-snug">
+            Confirm Ledger Restore
+          </h2>
+        </div>
+      </div>
+
+      <!-- Close Button ✕ -->
+      <button type="button" aria-label="Close dialog" class="w-8 h-8 shrink-0 rounded-lg border-2 border-[#171717] bg-[#F4F2EC] hover:bg-[#EAE6DD] text-[#171717] flex items-center justify-center font-bold text-sm shadow-[1.5px_1.5px_0px_#171717] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+        ✕
+      </button>
+    </div>
+
+    <!-- Modal Body Content -->
+    <div class="px-5 py-4 space-y-3.5 overflow-y-auto max-h-[calc(100vh-140px)]">
+
+      <!-- Context intro tag -->
+      <div class="flex items-center justify-between text-[11px] font-bold text-[#171717]/70">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-[#FFA200] inline-block animate-pulse"></span>
+          FILE VALIDATION SUCCESS
+        </span>
+        <span class="font-mono text-[10px] bg-[#171717]/5 px-1.5 py-0.5 rounded border border-[#171717]/20">SHA256: OK</span>
+      </div>
+
+      <!-- Backup File Inspection Summary Box -->
+      <div class="bg-[#F4F2EC] border-2 border-[#171717] rounded-xl p-3 shadow-[2px_2px_0px_#171717]">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#171717]/15">
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-[#171717]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span class="text-[11px] font-extrabold uppercase tracking-wide text-[#171717]">Parsed Backup Metadata</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold bg-white text-[#48CAE4] border border-[#171717] px-1.5 py-0.5 rounded">.JSON</span>
+        </div>
+
+        <dl class="space-y-1.5 text-[12px]">
+          <!-- File Format -->
+          <div class="flex items-center justify-between">
+            <dt class="text-[#171717]/70 font-semibold">File Format</dt>
+            <dd class="font-mono font-bold text-[#171717] text-[11px]">potfolioo-backup <span class="text-[#48CAE4] font-extrabold">(v1)</span></dd>
+          </div>
+
+          <!-- Book Name -->
+          <div class="flex items-center justify-between">
+            <dt class="text-[#171717]/70 font-semibold">Book Name</dt>
+            <dd class="font-bold text-[#171717] bg-white px-2 py-0.5 rounded border border-[#171717]/40 shadow-[1px_1px_0px_#171717]">Northstar Studio</dd>
+          </div>
+
+          <!-- Currency -->
+          <div class="flex items-center justify-between">
+            <dt class="text-[#171717]/70 font-semibold">Currency</dt>
+            <dd class="font-bold text-[#171717] font-mono">TZS (TSh)</dd>
+          </div>
+
+          <!-- Backup Created -->
+          <div class="flex items-center justify-between">
+            <dt class="text-[#171717]/70 font-semibold">Backup Created</dt>
+            <dd class="font-mono font-medium text-[#171717] text-[11px]">2026-11-01 14:30 UTC</dd>
+          </div>
+
+          <!-- Transactions to Import -->
+          <div class="flex items-center justify-between pt-1 border-t border-[#171717]/10">
+            <dt class="text-[#171717] font-extrabold">Transactions to Import</dt>
+            <dd class="font-extrabold text-[#48CAE4] bg-[#33415C]/10 px-2 py-0.5 rounded border border-[#48CAE4]/30 font-mono text-[12px]">
+              142 entries
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Destructive Warning Box -->
+      <div class="bg-[#FFF3DF] border border-[#B42318] rounded-xl p-3 relative shadow-[2px_2px_0px_#B42318]/20">
+        <div class="flex items-start gap-2.5">
+          <div class="w-5 h-5 rounded-full bg-[#B42318] text-white flex items-center justify-center shrink-0 mt-0.5 font-bold text-[11px]">
+            !
+          </div>
+          <div>
+            <p class="text-[11.5px] leading-[17px] text-[#B42318] font-bold">
+              <span class="uppercase tracking-wide font-extrabold underline decoration-[#B42318]">Warning:</span> Restoring this file will completely replace your current local book (<span class="underline font-extrabold text-[#171717]">'My Book', 14 entries</span>). This action cannot be undone unless you export your current data first.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-1.5 space-y-2.5">
+        <!-- Button 1: Replace Current Book (Destructive button: Danger Red #B42318, 2px border, 4px shadow, 48px height) -->
+        <button type="button" class="w-full h-[48px] bg-[#B42318] hover:bg-[#9E1D13] text-white font-extrabold text-[13px] tracking-wide uppercase rounded-xl border-2 border-[#171717] shadow-[4px_4px_0px_#171717] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#171717] transition-all flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>Replace Current Book</span>
+        </button>
+
+        <!-- Button 2: Export Current Book First (Royal Blue outline button) -->
+        <button type="button" class="w-full h-[44px] bg-white hover:bg-[#EEF9FD] text-[#48CAE4] font-bold text-[13px] rounded-xl border-2 border-[#48CAE4] shadow-[3px_3px_0px_#171717] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#171717] transition-all flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 stroke-[2.2]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Export Current Book First</span>
+        </button>
+
+        <!-- Button 3: Cancel (Tertiary text button) -->
+        <button type="button" class="w-full py-2 text-center text-[#171717] hover:text-[#171717]/70 font-extrabold text-[12.5px] uppercase tracking-wider transition-colors">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Security Micro-footer Note -->
+    <div class="px-5 py-2.5 bg-[#FDFBF7] border-t border-[#171717]/15 flex items-center justify-center gap-1.5 text-[10px] text-[#171717]/60 font-medium">
+      <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span>Zero cloud access • Restored client-side via IndexedDB</span>
+    </div>
+
+  </div>
+
+  <!-- Official Motion Animation Controller (Vanilla JS ES Module) -->
+  <script type="module" src="./motion-controller.js"></script>
+</body>
+</html>

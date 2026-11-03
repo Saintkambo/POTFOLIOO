@@ -1,0 +1,17 @@
+{
+  "name": "POTFOLIOO Bookkeeping",
+  "short_name": "POTFOLIOO",
+  "description": "Simple offline-first bookkeeping app for phones and computers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFDF8",
+  "theme_color": "#33415C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
