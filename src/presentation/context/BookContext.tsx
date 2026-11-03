@@ -36,6 +36,7 @@ import {
 } from '../../domain/models/inventory';
 import { DexieInventoryRepository } from '../../infrastructure/db/dexie-inventory-repository';
 import { DexieBusinessRepository } from '../../infrastructure/db/dexie-business-repository';
+import { db } from '../../infrastructure/db/database';
 import { BusinessOnboardingData } from '../../domain/models/business';
 import {
   DEMO_RETAIL_BOOK,
@@ -214,6 +215,10 @@ interface BookContextType {
   downloadExcel: () => Promise<void>;
   downloadPDF: () => Promise<void>;
 
+  // Fresh Start & Data Reset
+  resetBusinessData: (bookId: string) => Promise<void>;
+  restartOnboarding: () => Promise<void>;
+
   clearError: () => void;
 }
 
@@ -330,26 +335,36 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         setIsLoading(true);
 
-        // 1. Assign any unassigned local books to the current user
-        await bookRepo.assignBooksToUser(currentUser.id);
+        // 1. Purge any legacy pre-onboarding mock books that lack a legitimate businessId
+        const legacyMockBooks = await db.books.filter((b: Book) => !b.businessId).toArray();
+        for (const mb of legacyMockBooks) {
+          await db.books.delete(mb.id);
+          await db.transactions.where('bookId').equals(mb.id).delete();
+          await db.inventoryItems.where('bookId').equals(mb.id).delete();
+        }
 
-        // 2. Fetch all books for current user
-        let userBooks = await bookRepo.getBooksByUserId(currentUser.id);
+        // 2. Fetch all legitimate business books for current user
+        let userBooks = (await bookRepo.getBooksByUserId(currentUser.id)).filter((b) => Boolean(b.businessId));
 
         // 3. If user has no local books yet, attempt cloud sync from backend
         if (userBooks.length === 0 && authSession?.token) {
           try {
             await clientAuthService.syncUserCloudData(currentUser.id, authSession.token);
-            userBooks = await bookRepo.getBooksByUserId(currentUser.id);
+            userBooks = (await bookRepo.getBooksByUserId(currentUser.id)).filter((b) => Boolean(b.businessId));
           } catch (syncErr) {
             console.warn('Initial cloud sync notice:', syncErr);
           }
         }
 
-        // 4. If still no books, leave book as null so user enters 4-step onboarding
+        // 4. If user has no business books yet, leave book as null so user enters 4-step onboarding fresh
         if (userBooks.length === 0) {
           setBooks([]);
           setBook(null);
+          setMonthTransactions([]);
+          setAllTransactions([]);
+          setInventoryItems([]);
+          setSummary(calculateMonthSummary(selectedMonth, []));
+          localStorage.removeItem('potfolioo_active_book_id');
           setIsLoading(false);
           return;
         }
@@ -510,6 +525,56 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete business');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reset all transactions & inventory for an active business (Start fresh)
+  const resetBusinessData = async (bookId: string) => {
+    try {
+      setIsLoading(true);
+      await db.transaction('rw', db.transactions, db.inventoryItems, async () => {
+        await db.transactions.where('bookId').equals(bookId).delete();
+        await db.inventoryItems.where('bookId').equals(bookId).delete();
+      });
+      if (book && book.id === bookId) {
+        setMonthTransactions([]);
+        setAllTransactions([]);
+        setInventoryItems([]);
+        setSummary(calculateMonthSummary(selectedMonth, []));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset business data');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Restart onboarding from scratch (clears all current business records)
+  const restartOnboarding = async () => {
+    try {
+      setIsLoading(true);
+      if (currentUser) {
+        const userBooks = await bookRepo.getBooksByUserId(currentUser.id);
+        for (const b of userBooks) {
+          await bookRepo.deleteBook(b.id);
+        }
+        await db.businesses.clear();
+        await db.businessMembers.clear();
+      }
+      setBook(null);
+      setBooks([]);
+      setMonthTransactions([]);
+      setAllTransactions([]);
+      setInventoryItems([]);
+      setSummary(calculateMonthSummary(selectedMonth, []));
+      localStorage.removeItem('potfolioo_active_book_id');
+      localStorage.removeItem('potfolioo_onboarding_draft');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to restart onboarding');
       throw err;
     } finally {
       setIsLoading(false);
@@ -1261,6 +1326,8 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
         downloadCSV,
         downloadExcel,
         downloadPDF,
+        resetBusinessData,
+        restartOnboarding,
         clearError: () => setError(null),
       }}
     >

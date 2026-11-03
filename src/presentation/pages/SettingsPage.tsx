@@ -54,6 +54,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenRestoreModal }
     downloadCSV,
     downloadExcel,
     downloadPDF,
+    resetBusinessData,
+    restartOnboarding,
     isStoragePersisted,
     cloudSyncStatus,
     lastSyncTime,
@@ -878,6 +880,52 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenRestoreModal }
               </Button>
             </div>
           )}
+        </div>
+      </Card>
+
+      {/* 5. Fresh Start & Data Reset Card */}
+      <Card shadowSize="lg" className="space-y-3.5 border-2 border-blackstone">
+        <div className="border-b border-blackstone/10 pb-2">
+          <h2 className="text-sm font-bold font-heading text-blackstone uppercase tracking-wider flex items-center gap-2">
+            <Trash2 className="w-3.5 h-3.5 text-danger" />
+            <span>Reset & Fresh Start</span>
+          </h2>
+          <p className="text-xs text-text-secondary mt-0.5">
+            Clear recorded transactions or restart business onboarding with a completely fresh ledger.
+          </p>
+        </div>
+
+        <div className="space-y-2.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="md"
+            className="w-full justify-center gap-2 border-2 border-blackstone text-blackstone hover:bg-canvas"
+            onClick={async () => {
+              if (book && confirm(`Are you sure you want to clear all transactions and inventory for "${book.name}"? This will reset your ledger to 0.`)) {
+                await resetBusinessData(book.id);
+                setSaveMessage('All transactions and inventory reset to 0. You have a fresh slate.');
+              }
+            }}
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-blackstone" />
+            <span>Reset Active Ledger to 0</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="destructive"
+            size="md"
+            className="w-full justify-center gap-2 border-2 border-danger text-danger hover:bg-danger/5"
+            onClick={async () => {
+              if (confirm('Are you sure you want to restart business onboarding? This will remove existing business records so you can set up fresh.')) {
+                await restartOnboarding();
+              }
+            }}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Restart Business Setup from Scratch</span>
+          </Button>
         </div>
       </Card>
 
