@@ -120,11 +120,21 @@ export class ClientAuthService {
       });
 
       if (error) {
+        if (error.message.toLowerCase().includes('invalid login credentials')) {
+          throw new Error('Invalid email or password. Please verify your password or use "Forgot password" to reset it.');
+        }
         throw new Error(error.message);
       }
 
       if (!data.user) {
         throw new Error('Registration failed to create an account.');
+      }
+
+      // Check if user already exists (Supabase returns an empty identities array for duplicate emails)
+      if (Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        throw new Error(
+          'An account with this email address already exists. Please sign in with your password, or use "Forgot password" to reset it.'
+        );
       }
 
       const profile: UserProfile = {
@@ -223,6 +233,9 @@ export class ClientAuthService {
       });
 
       if (error) {
+        if (error.message.toLowerCase().includes('invalid login credentials')) {
+          throw new Error('Invalid email or password. Please verify your password or use "Forgot password" to reset it.');
+        }
         throw new Error(error.message);
       }
 
