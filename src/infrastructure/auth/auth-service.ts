@@ -403,6 +403,68 @@ export class ClientAuthService {
   }
 
   /**
+   * Verify Email OTP token (6-digit code from email) via Supabase Auth
+   */
+  async verifyEmailOtp(email: string, token: string): Promise<{ user: UserProfile; token: string }> {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase cloud service is required for Email OTP verification.');
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanToken = token.trim();
+
+    // First attempt verification using type: 'signup'
+    let { data, error } = await supabase.auth.verifyOtp({
+      email: cleanEmail,
+      token: cleanToken,
+      type: 'signup',
+    });
+
+    // Fallback to type: 'email' if signup type is rejected or token type differs
+    if (error) {
+      const fallback = await supabase.auth.verifyOtp({
+        email: cleanEmail,
+        token: cleanToken,
+        type: 'email',
+      });
+      if (!fallback.error && fallback.data?.user) {
+        data = fallback.data;
+        error = null;
+      }
+    }
+
+    if (error) {
+      throw new Error(error.message || 'Invalid or expired email verification code.');
+    }
+
+    if (!data.user) {
+      throw new Error('Email verification failed.');
+    }
+
+    const profile: UserProfile = {
+      id: data.user.id,
+      username: data.user.user_metadata?.full_name || data.user.user_metadata?.username || cleanEmail.split('@')[0],
+      email: cleanEmail,
+      emailVerified: true,
+      phoneVerified: false,
+      pinEnabled: false,
+      provider: 'supabase',
+      createdAt: data.user.created_at,
+      updatedAt: data.user.updated_at || data.user.created_at,
+    };
+
+    const session: AuthSession = {
+      token: data.session?.access_token || `token_${Date.now()}`,
+      user: profile,
+    };
+
+    this.saveSession(session);
+    await db.userProfiles.put(profile);
+
+    return { user: profile, token: session.token };
+  }
+
+  /**
    * Request Password Recovery via Supabase or Backend
    */
   async requestPasswordRecovery(email: string): Promise<{ success: boolean; message: string }> {

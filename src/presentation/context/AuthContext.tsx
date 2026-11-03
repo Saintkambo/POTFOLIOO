@@ -21,6 +21,7 @@ interface AuthContextType {
   // Modern Supabase & Unified Auth
   signUpWithEmail: (params: { fullName: string; email: string; password: string }) => Promise<{ requiresVerification: boolean; email: string }>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
+  verifyEmailOtp: (email: string, token: string) => Promise<void>;
   resendVerificationEmail: (email: string) => Promise<{ success: boolean; message: string }>;
   signInWithGoogle: () => Promise<void>;
   signInWithPhoneOtp: (phone: string) => Promise<{ success: boolean; message: string }>;
@@ -221,6 +222,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return clientAuthService.resendVerificationEmail(email);
   };
 
+  const verifyEmailOtp = async (email: string, token: string) => {
+    setAuthError(null);
+    try {
+      const { user, token: sessionToken } = await clientAuthService.verifyEmailOtp(email, token);
+      const session: AuthSession = { user, token: sessionToken };
+      setCurrentUser(user);
+      setAuthSession(session);
+      setIsAppLocked(false);
+    } catch (err: any) {
+      setAuthError(err.message || 'Email OTP verification failed');
+      throw err;
+    }
+  };
+
   const signInWithGoogle = async () => {
     setAuthError(null);
     try {
@@ -363,6 +378,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUpWithEmail,
         signInWithEmail,
         resendVerificationEmail,
+        verifyEmailOtp,
         signInWithGoogle,
         signInWithPhoneOtp,
         verifyPhoneOtp,

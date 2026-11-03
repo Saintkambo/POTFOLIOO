@@ -29,6 +29,7 @@ export const WelcomePage: React.FC = () => {
     signInWithEmail,
     signUpWithEmail,
     resendVerificationEmail,
+    verifyEmailOtp,
     signInWithGoogle,
     signInWithPhoneOtp,
     verifyPhoneOtp,
@@ -54,6 +55,7 @@ export const WelcomePage: React.FC = () => {
 
   // Verification state
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
+  const [emailOtp, setEmailOtp] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // Phone Auth state
@@ -183,6 +185,28 @@ export const WelcomePage: React.FC = () => {
       setResendCooldown(60);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to resend verification email.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 3b. Verify Email OTP Code
+  const handleVerifyEmailOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearMessages();
+
+    const cleanToken = emailOtp.trim();
+    if (!cleanToken || cleanToken.length < 6) {
+      setErrorMessage('Please enter the 6-digit confirmation code sent to your email.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await verifyEmailOtp(pendingVerificationEmail, cleanToken);
+      setSuccessMessage('Email verified successfully! Loading your business workspace...');
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Invalid or expired confirmation code.');
     } finally {
       setIsSubmitting(false);
     }
@@ -760,45 +784,93 @@ export const WelcomePage: React.FC = () => {
               exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
             >
-              <Card shadowSize="lg" className="space-y-5 p-6 sm:p-8 text-center">
-                <div className="w-14 h-14 bg-electric-sky text-blackstone rounded-2xl border-2 border-blackstone shadow-brutal flex items-center justify-center mx-auto">
-                  <Mail className="w-7 h-7 stroke-[2.2]" />
+              <Card shadowSize="lg" className="space-y-5 p-6 sm:p-8">
+                {/* Back Link */}
+                <div className="flex items-center justify-between pb-1 border-b border-blackstone/10">
+                  <button
+                    type="button"
+                    onClick={() => navigateTo('signup')}
+                    className="inline-flex items-center gap-1.5 text-xs font-extrabold text-blackstone hover:text-slate-navy cursor-pointer"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Sign Up</span>
+                  </button>
+                  <span className="text-xs font-bold text-text-secondary">Email Verification</span>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="text-center space-y-2">
+                  <div className="w-14 h-14 bg-electric-sky text-blackstone rounded-2xl border-2 border-blackstone shadow-brutal flex items-center justify-center mx-auto">
+                    <Mail className="w-7 h-7 stroke-[2.2]" />
+                  </div>
                   <h2 className="text-xl font-black font-heading text-blackstone tracking-tight">
                     Verify your email address
                   </h2>
                   <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
-                    We sent a secure verification link to:
+                    We sent a 6-digit confirmation code and link to:
                   </p>
                   <div className="inline-block px-3 py-1 bg-surface-muted rounded-control border border-blackstone/30 font-black text-xs text-blackstone">
                     {pendingVerificationEmail}
                   </div>
-                  <p className="text-[11px] text-text-secondary pt-1">
-                    Please open the link in your email to confirm your account and launch business onboarding.
-                  </p>
                 </div>
 
                 {successMessage && (
                   <div className="p-3 bg-success/10 border-2 border-success text-success rounded-control text-xs font-bold flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
                     <span>{successMessage}</span>
                   </div>
                 )}
 
                 {errorMessage && (
-                  <div className="p-3 bg-danger/10 border-2 border-danger text-danger rounded-control text-xs font-bold flex items-center justify-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
+                  <div className="p-3 bg-danger/10 border-2 border-danger text-danger rounded-control text-xs font-bold flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                     <span>{errorMessage}</span>
                   </div>
                 )}
 
-                <div className="space-y-3 pt-2">
+                {/* 6-Digit OTP Form */}
+                <form onSubmit={handleVerifyEmailOtp} className="space-y-4">
+                  <div className="space-y-1.5 text-left">
+                    <label htmlFor="emailOtp" className="block text-xs font-black text-blackstone uppercase tracking-wider">
+                      Enter 6-Digit Verification Code
+                    </label>
+                    <Input
+                      id="emailOtp"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      placeholder="• • • • • •"
+                      value={emailOtp}
+                      onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      autoComplete="one-time-code"
+                      required
+                      className="text-center font-mono text-xl tracking-[0.35em] font-black h-12"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    fullWidth
+                    loading={isSubmitting}
+                    disabled={emailOtp.trim().length < 6}
+                    className="font-black text-sm"
+                  >
+                    Verify Code & Continue
+                  </Button>
+                </form>
+
+                <p className="text-[11px] text-center text-text-secondary">
+                  Or click the secure verification link inside your email message.
+                </p>
+
+                {/* Resend and Diagnostic Actions */}
+                <div className="space-y-3 pt-2 border-t border-blackstone/10">
                   <Button
                     type="button"
-                    variant="primary"
-                    size="md"
+                    variant="secondary"
+                    size="sm"
                     fullWidth
                     disabled={resendCooldown > 0}
                     loading={isSubmitting}
@@ -807,9 +879,21 @@ export const WelcomePage: React.FC = () => {
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${isSubmitting ? 'animate-spin' : ''}`} />
                     <span>
-                      {resendCooldown > 0 ? `Resend email in ${resendCooldown}s` : 'Resend Verification Email'}
+                      {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend Verification Code'}
                     </span>
                   </Button>
+
+                  <div className="p-3 bg-surface-muted rounded-control border border-blackstone/20 text-left text-[11px] text-text-secondary space-y-1.5">
+                    <div className="font-black text-blackstone flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-vivid-amber shrink-0" />
+                      <span>Verification Code Not Arriving?</span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-0.5 text-text-secondary">
+                      <li>Check your <strong>Spam / Junk</strong> or Promotions folder.</li>
+                      <li>Free testing mail services allow at most 3-4 emails per hour.</li>
+                      <li>To log in without delay, you can disable <em>"Confirm email"</em> in your Supabase Auth settings.</li>
+                    </ul>
+                  </div>
 
                   <Button
                     type="button"
