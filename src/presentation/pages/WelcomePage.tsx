@@ -7,7 +7,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   BookOpen,
   Mail,
-  Phone,
+  User,
   Eye,
   EyeOff,
   ArrowRight,
@@ -20,7 +20,7 @@ import {
   Store,
 } from 'lucide-react';
 
-type WelcomeView = 'landing' | 'signin' | 'signup' | 'phone' | 'forgot';
+type WelcomeView = 'landing' | 'signin' | 'signup' | 'forgot';
 
 interface WelcomePageProps {
   initialView?: WelcomeView;
@@ -29,20 +29,18 @@ interface WelcomePageProps {
 export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
   const {
     enterDemoMode,
-    signInWithEmail,
-    signUpWithEmail,
+    signIn,
+    signUp,
     signInWithGoogle,
-    signInWithPhoneOtp,
-    verifyPhoneOtp,
     resetPasswordForEmail,
     updateUserPassword,
   } = useAuth();
 
   const shouldReduceMotion = useReducedMotion();
   const [view, setView] = useState<WelcomeView>(() => {
-    if (initialView) return initialView;
+    if (initialView && initialView !== ('phone' as any)) return initialView;
     const requested = localStorage.getItem('potfolioo_auth_view');
-    if (requested === 'signin' || requested === 'signup' || requested === 'phone' || requested === 'forgot') {
+    if (requested === 'signin' || requested === 'signup' || requested === 'forgot') {
       localStorage.removeItem('potfolioo_auth_view');
       return requested;
     }
@@ -53,25 +51,18 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
   });
 
   // Sign In state
-  const [signInEmail, setSignInEmail] = useState('');
+  const [signInIdentifier, setSignInIdentifier] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
   const [showSignInPassword, setShowSignInPassword] = useState(false);
 
   // Sign Up state
+  const [signUpUsername, setSignUpUsername] = useState('');
   const [signUpFullName, setSignUpFullName] = useState('');
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('');
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-
-  // Phone Auth state
-  const [phoneCountryCode, setPhoneCountryCode] = useState('+255');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [phoneOtp, setPhoneOtp] = useState('');
-  const [phoneStep, setPhoneStep] = useState<'phone' | 'otp'>('phone');
-  const [phoneDiagnostic, setPhoneDiagnostic] = useState<string | null>(null);
-  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Forgot Password state
   const [forgotEmail, setForgotEmail] = useState('');
@@ -87,7 +78,6 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
   const clearMessages = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
-    setPhoneDiagnostic(null);
   };
 
   const navigateTo = (newView: WelcomeView) => {
@@ -103,30 +93,21 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
     }
   }, []);
 
-  // Resend cooldown timer
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
-
   // 1. Submit Sign In
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
 
-    if (!signInEmail.trim() || !signInPassword) {
-      setErrorMessage('Please enter both your email address and password.');
+    if (!signInIdentifier.trim() || !signInPassword) {
+      setErrorMessage('Please enter both your username and password.');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await signInWithEmail(signInEmail.trim(), signInPassword);
+      await signIn(signInIdentifier.trim(), signInPassword);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Sign in failed. Please check your credentials.');
+      setErrorMessage(err.message || 'Invalid username or password. Please check your credentials.');
     } finally {
       setIsSubmitting(false);
     }
@@ -137,14 +118,21 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
     e.preventDefault();
     clearMessages();
 
-    if (!signUpFullName.trim()) {
-      setErrorMessage('Please enter your full name.');
+    const cleanUsername = signUpUsername.trim().toLowerCase();
+    if (!cleanUsername || cleanUsername.length < 3) {
+      setErrorMessage('Username must be at least 3 characters long.');
       return;
     }
-    if (!signUpEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signUpEmail.trim())) {
-      setErrorMessage('Please enter a valid email address.');
+    if (!/^[a-z0-9_-]+$/i.test(cleanUsername)) {
+      setErrorMessage('Username can only contain letters, numbers, underscores and hyphens.');
       return;
     }
+
+    if (signUpEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signUpEmail.trim())) {
+      setErrorMessage('Please enter a valid email address or leave it blank.');
+      return;
+    }
+
     if (/^\d{4}$/.test(signUpPassword)) {
       setErrorMessage('A 4-digit code cannot be used as your account password. Please choose a secure password with at least 8 characters.');
       return;
@@ -164,80 +152,28 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
 
     setIsSubmitting(true);
     try {
-      await signUpWithEmail({
-        fullName: signUpFullName.trim(),
-        email: signUpEmail.trim(),
+      await signUp({
+        username: cleanUsername,
         password: signUpPassword,
+        email: signUpEmail.trim() || undefined,
+        fullName: signUpFullName.trim() || undefined,
       });
       // Session is automatically established and currentUser is populated in AuthContext.
       // App.tsx detects isAuthenticated === true and transitions directly to OnboardingPage ("opening business")!
     } catch (err: any) {
-      setErrorMessage(err.message || 'Registration failed. An account with this email may already exist.');
+      setErrorMessage(err.message || 'Registration failed. Please check your inputs or choose another username.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 3. Send Phone OTP
-  const handleSendPhoneOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearMessages();
-
-    const cleanNumber = phoneNumber.replace(/[\s-]/g, '');
-    if (!cleanNumber || cleanNumber.length < 6) {
-      setErrorMessage('Please enter a valid phone number.');
-      return;
-    }
-
-    const fullPhone = `${phoneCountryCode}${cleanNumber.startsWith('0') ? cleanNumber.slice(1) : cleanNumber}`;
-
-    setIsSubmitting(true);
-    try {
-      await signInWithPhoneOtp(fullPhone);
-      setPhoneStep('otp');
-      setResendCooldown(60);
-      setSuccessMessage(`One-time code sent to ${fullPhone}`);
-    } catch (err: any) {
-      if (err.message.includes('SMS Provider Unconfigured')) {
-        setPhoneDiagnostic(err.message);
-      } else {
-        setErrorMessage(err.message || 'Failed to send verification SMS.');
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // 5. Verify Phone OTP
-  const handleVerifyPhoneOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearMessages();
-
-    if (!phoneOtp.trim() || phoneOtp.trim().length < 6) {
-      setErrorMessage('Please enter the 6-digit OTP code sent to your phone.');
-      return;
-    }
-
-    const cleanNumber = phoneNumber.replace(/[\s-]/g, '');
-    const fullPhone = `${phoneCountryCode}${cleanNumber.startsWith('0') ? cleanNumber.slice(1) : cleanNumber}`;
-
-    setIsSubmitting(true);
-    try {
-      await verifyPhoneOtp(fullPhone, phoneOtp.trim());
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Invalid or expired verification code.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // 6. Request Password Recovery
+  // 3. Request Password Recovery
   const handleForgotRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
 
-    if (!forgotEmail.trim() || !forgotEmail.includes('@')) {
-      setErrorMessage('Please enter your registered email address.');
+    if (!forgotEmail.trim()) {
+      setErrorMessage('Please enter your username or email address.');
       return;
     }
 
@@ -465,13 +401,13 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
 
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <Input
-                    label="Email Address"
-                    type="email"
-                    value={signInEmail}
-                    onChange={(e) => setSignInEmail(e.target.value)}
-                    placeholder="e.g. baraka@business.co.tz"
+                    label="Username or Email"
+                    type="text"
+                    value={signInIdentifier}
+                    onChange={(e) => setSignInIdentifier(e.target.value)}
+                    placeholder="e.g. baraka_ali or baraka@business.co.tz"
                     required
-                    leftIcon={<Mail className="w-4 h-4" />}
+                    leftIcon={<User className="w-4 h-4" />}
                   />
 
                   <div className="space-y-1.5">
@@ -546,18 +482,6 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
                     </svg>
                     <span>Continue with Google</span>
                   </Button>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="md"
-                    fullWidth
-                    onClick={() => navigateTo('phone')}
-                    className="flex items-center justify-center gap-2 text-xs font-black text-blackstone border border-blackstone/30 hover:border-blackstone"
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>Use Phone Number (SMS OTP)</span>
-                  </Button>
                 </div>
 
                 {/* Footer Switch */}
@@ -602,10 +526,10 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
 
                 <div className="space-y-1">
                   <h2 className="text-xl font-black font-heading text-blackstone tracking-tight">
-                    Create your profile
+                    Create your account
                   </h2>
                   <p className="text-xs text-text-secondary">
-                    Set up your secure credentials to start managing your business.
+                    Set up your secure username and password to start managing your business.
                   </p>
                 </div>
 
@@ -617,23 +541,40 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
                 )}
 
                 <form onSubmit={handleSignUp} className="space-y-3.5">
+                  <div className="space-y-1">
+                    <Input
+                      label="Username (Required)"
+                      value={signUpUsername}
+                      onChange={(e) => setSignUpUsername(e.target.value)}
+                      placeholder="e.g. baraka_ali"
+                      required
+                      leftIcon={<User className="w-4 h-4" />}
+                    />
+                    <p className="text-[11px] text-text-secondary pl-1">
+                      At least 3 characters. Letters, numbers, underscores, and hyphens.
+                    </p>
+                  </div>
+
                   <Input
-                    label="Full Name"
+                    label="Full Name (Optional)"
                     value={signUpFullName}
                     onChange={(e) => setSignUpFullName(e.target.value)}
                     placeholder="e.g. Baraka Ali"
-                    required
                   />
 
-                  <Input
-                    label="Email Address"
-                    type="email"
-                    value={signUpEmail}
-                    onChange={(e) => setSignUpEmail(e.target.value)}
-                    placeholder="e.g. baraka@business.co.tz"
-                    required
-                    leftIcon={<Mail className="w-4 h-4" />}
-                  />
+                  <div className="space-y-1">
+                    <Input
+                      label="Email Address (Optional)"
+                      type="email"
+                      value={signUpEmail}
+                      onChange={(e) => setSignUpEmail(e.target.value)}
+                      placeholder="e.g. baraka@business.co.tz"
+                      leftIcon={<Mail className="w-4 h-4" />}
+                    />
+                    <p className="text-[11px] text-text-secondary pl-1">
+                      Optional profile info for password recovery. Email verification is not required.
+                    </p>
+                  </div>
 
                   <div className="space-y-1">
                     <label className="block text-xs font-extrabold uppercase tracking-wider text-blackstone/80">
@@ -693,7 +634,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
                     loading={isSubmitting}
                     className="text-sm font-black mt-2"
                   >
-                    Create Business Profile
+                    Create Account
                   </Button>
                 </form>
 
@@ -735,176 +676,6 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ initialView }) => {
                     Sign In
                   </button>
                 </div>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* -----------------------------------------------------------------------
-              VIEW 4: PHONE NUMBER AUTHENTICATION (SMS OTP)
-              ----------------------------------------------------------------------- */}
-          {view === 'phone' && (
-            <motion.div
-              key="phone"
-              initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-            >
-              <Card shadowSize="lg" className="space-y-5 p-6 sm:p-8">
-                {/* Back Link & Header */}
-                <div className="flex items-center justify-between pb-1 border-b border-blackstone/10">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (phoneStep === 'otp') {
-                        setPhoneStep('phone');
-                      } else {
-                        navigateTo('signin');
-                      }
-                    }}
-                    className="inline-flex items-center gap-1.5 text-xs font-extrabold text-blackstone hover:text-slate-navy cursor-pointer"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>{phoneStep === 'otp' ? 'Change Phone' : 'Back to Sign In'}</span>
-                  </button>
-                  <span className="text-xs font-bold text-text-secondary">Phone OTP</span>
-                </div>
-
-                <div className="space-y-1">
-                  <h2 className="text-xl font-black font-heading text-blackstone tracking-tight">
-                    {phoneStep === 'otp' ? 'Enter Verification Code' : 'Sign In with Phone'}
-                  </h2>
-                  <p className="text-xs text-text-secondary">
-                    {phoneStep === 'otp'
-                      ? `Enter the 6-digit one-time code sent to ${phoneCountryCode} ${phoneNumber}`
-                      : "We'll send a 6-digit one-time verification code (OTP) via SMS."}
-                  </p>
-                </div>
-
-                {/* SMS Provider Missing Diagnostic Banner */}
-                {phoneDiagnostic && (
-                  <div className="p-3.5 bg-vivid-amber-tint border-2 border-vivid-amber rounded-control space-y-2 text-xs">
-                    <div className="flex items-center gap-1.5 font-black text-blackstone">
-                      <AlertCircle className="w-4 h-4 text-vivid-amber-dark shrink-0" />
-                      <span>SMS Provider Configuration Required</span>
-                    </div>
-                    <p className="text-blackstone/80 text-[11px] leading-relaxed">
-                      Supabase Phone Auth requires a configured SMS provider (Twilio or MessageBird) in your Supabase Auth Dashboard.
-                    </p>
-                    <Button
-                      type="button"
-                      variant="primary"
-                      size="sm"
-                      fullWidth
-                      onClick={() => navigateTo('signin')}
-                      className="text-xs font-black mt-1"
-                    >
-                      Use Email or Google Sign-In Instead
-                    </Button>
-                  </div>
-                )}
-
-                {errorMessage && (
-                  <div className="p-3 bg-danger/10 border-2 border-danger text-danger rounded-control text-xs font-bold flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>{errorMessage}</span>
-                  </div>
-                )}
-
-                {successMessage && (
-                  <div className="p-3 bg-success/10 border-2 border-success text-success rounded-control text-xs font-bold flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    <span>{successMessage}</span>
-                  </div>
-                )}
-
-                {phoneStep === 'phone' ? (
-                  <form onSubmit={handleSendPhoneOtp} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-blackstone/80">
-                        Phone Number
-                      </label>
-                      <div className="flex gap-2">
-                        {/* Country code selector with Tanzania +255 default */}
-                        <select
-                          value={phoneCountryCode}
-                          onChange={(e) => setPhoneCountryCode(e.target.value)}
-                          className="px-2.5 py-2.5 rounded-control border-2 border-blackstone bg-surface text-blackstone font-extrabold text-xs focus:outline-none focus:ring-2 focus:ring-electric-sky"
-                        >
-                          <option value="+255">🇹🇿 +255 (Tanzania)</option>
-                          <option value="+254">🇰🇪 +254 (Kenya)</option>
-                          <option value="+256">🇺🇬 +256 (Uganda)</option>
-                          <option value="+250">🇷🇼 +250 (Rwanda)</option>
-                          <option value="+1">🇺🇸 +1 (US/Canada)</option>
-                          <option value="+44">🇬🇧 +44 (UK)</option>
-                        </select>
-
-                        <input
-                          type="tel"
-                          value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
-                          placeholder="754 123 456"
-                          required
-                          className="flex-1 px-3.5 py-2.5 rounded-control border-2 border-blackstone bg-surface text-blackstone font-medium text-sm focus:outline-none focus:ring-2 focus:ring-electric-sky"
-                        />
-                      </div>
-                      <p className="text-[11px] text-text-secondary">
-                        Enter digits without leading zero (e.g. 754 123 456).
-                      </p>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      size="lg"
-                      fullWidth
-                      loading={isSubmitting}
-                      className="text-sm font-black mt-2"
-                    >
-                      Send Verification Code
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleVerifyPhoneOtp} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-blackstone/80">
-                        6-Digit OTP Code
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={6}
-                        value={phoneOtp}
-                        onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
-                        placeholder="123456"
-                        required
-                        autoFocus
-                        className="w-full text-center tracking-[0.4em] text-xl font-black px-3.5 py-3 rounded-control border-2 border-blackstone bg-surface text-blackstone focus:outline-none focus:ring-2 focus:ring-electric-sky"
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      size="lg"
-                      fullWidth
-                      loading={isSubmitting}
-                      className="text-sm font-black mt-2"
-                    >
-                      Verify & Continue
-                    </Button>
-
-                    <div className="text-center pt-2">
-                      <button
-                        type="button"
-                        disabled={resendCooldown > 0}
-                        onClick={handleSendPhoneOtp}
-                        className="text-xs font-extrabold text-slate-navy hover:underline disabled:opacity-50 cursor-pointer"
-                      >
-                        {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend SMS Code'}
-                      </button>
-                    </div>
-                  </form>
-                )}
               </Card>
             </motion.div>
           )}

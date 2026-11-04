@@ -105,14 +105,16 @@ export class AuthService {
 
   async register(params: {
     username: string;
-    contact: string;
-    contactType: 'email' | 'phone';
     password: string;
+    email?: string;
+    phone?: string;
+    fullName?: string;
+    contact?: string;
+    contactType?: 'email' | 'phone';
     verificationCode?: string;
   }): Promise<{ user: UserProfileDTO; token: string; verificationCode?: string }> {
     const db = getDb();
     const cleanUsername = params.username.trim().toLowerCase();
-    const cleanContact = params.contact.trim();
 
     if (cleanUsername.length < 3) {
       throw new ValidationError('username', 'Username must be at least 3 characters long.');
@@ -123,52 +125,56 @@ export class AuthService {
 
     this.validateSecurePassword(params.password);
 
-    // Validate email / phone format
-    const isEmail = params.contactType === 'email';
-    if (isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanContact)) {
-      throw new ValidationError('contact', 'Please provide a valid email address.');
-    }
-    if (!isEmail && !/^\+?[0-9]{7,15}$/.test(cleanContact.replace(/[\s-]/g, ''))) {
-      throw new ValidationError('contact', 'Please provide a valid phone number with digits.');
-    }
-
     // Check if username already exists
     const existingUser = db.prepare('SELECT id FROM users WHERE username = ?').get(cleanUsername);
     if (existingUser) {
       throw new ValidationError('username', 'This username is already taken. Please choose another.');
     }
 
-    // Check if contact already exists
-    const existingContact = isEmail
-      ? db.prepare('SELECT id FROM users WHERE email = ?').get(cleanContact.toLowerCase())
-      : db.prepare('SELECT id FROM users WHERE phone = ?').get(cleanContact);
-    if (existingContact) {
-      throw new ValidationError('contact', `This ${params.contactType} is already associated with an account.`);
+    // Optional email handling (email is never required, never verified)
+    let emailToStore: string | null = null;
+    const rawEmail = params.email || (params.contactType === 'email' ? params.contact : undefined);
+    if (rawEmail && rawEmail.trim()) {
+      const cleanEmail = rawEmail.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        throw new ValidationError('email', 'Please provide a valid email address.');
+      }
+      const existingEmail = db.prepare('SELECT id FROM users WHERE email = ?').get(cleanEmail);
+      if (existingEmail) {
+        throw new ValidationError('email', 'This email is already associated with an account.');
+      }
+      emailToStore = cleanEmail;
+    }
+
+    // Optional phone handling
+    let phoneToStore: string | null = null;
+    const rawPhone = params.phone || (params.contactType === 'phone' ? params.contact : undefined);
+    if (rawPhone && rawPhone.trim()) {
+      const cleanPhone = rawPhone.trim();
+      const existingPhone = db.prepare('SELECT id FROM users WHERE phone = ?').get(cleanPhone);
+      if (existingPhone) {
+        throw new ValidationError('phone', 'This phone number is already associated with an account.');
+      }
+      phoneToStore = cleanPhone;
     }
 
     const { hash, salt } = hashSecret(params.password);
     const userId = crypto.randomUUID();
     const now = new Date().toISOString();
-    const verificationCode = generateNumericCode(6);
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     db.prepare(`
       INSERT INTO users (
         id, username, email, phone, password_hash, salt,
         pin_enabled, email_verified, phone_verified, provider,
         verification_code, verification_expires_at, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, 'local', ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, 0, 1, 1, 'local', NULL, NULL, ?, ?)
     `).run(
       userId,
       cleanUsername,
-      isEmail ? cleanContact.toLowerCase() : null,
-      !isEmail ? cleanContact : null,
+      emailToStore,
+      phoneToStore,
       hash,
       salt,
-      isEmail ? 1 : 0, // Auto-verified upon code entry/registration
-      !isEmail ? 1 : 0,
-      verificationCode,
-      expiresAt,
       now,
       now
     );
@@ -188,7 +194,6 @@ export class AuthService {
     return {
       user: this.toDTO(userRow),
       token,
-      verificationCode,
     };
   }
 
@@ -209,12 +214,12 @@ export class AuthService {
     `).get(cleanId, cleanId, cleanId) as unknown as UserRow | undefined;
 
     if (!userRow) {
-      throw new UnauthorizedError('Invalid username, email, phone, or password.');
+      throw new UnauthorizedError('Invalid username or password. Please check your credentials.');
     }
 
     const isValid = verifySecret(password, userRow.password_hash, userRow.salt);
     if (!isValid) {
-      throw new UnauthorizedError('Invalid username, email, phone, or password.');
+      throw new UnauthorizedError('Invalid username or password. Please check your credentials.');
     }
 
     // Reset rate limit on successful credentials

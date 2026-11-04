@@ -1,7 +1,7 @@
 import { SqliteTransactionRepository } from '../../infrastructure/repositories/sqlite-transaction-repository.js';
 import { SqliteBookRepository } from '../../infrastructure/repositories/sqlite-book-repository.js';
 import { MonthlySummary } from '../../domain/models/summary.js';
-import { NotFoundError } from '../../domain/errors.js';
+import { NotFoundError, ForbiddenError } from '../../domain/errors.js';
 
 export class SummaryService {
   constructor(
@@ -9,10 +9,13 @@ export class SummaryService {
     private bookRepo = new SqliteBookRepository()
   ) {}
 
-  getMonthlySummary(bookId: string, monthYear: string): MonthlySummary {
+  getMonthlySummary(bookId: string, monthYear: string, userId?: string): MonthlySummary {
     const book = this.bookRepo.findById(bookId);
     if (!book) {
       throw new NotFoundError('Book', bookId);
+    }
+    if (userId && book.userId && book.userId !== userId) {
+      throw new ForbiddenError('You do not have permission to access summaries for this book.');
     }
 
     const [yearStr, monthStr] = monthYear.split('-');

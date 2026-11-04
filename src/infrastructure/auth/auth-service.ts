@@ -97,31 +97,49 @@ export class ClientAuthService {
   }
 
   /**
-   * Sign up with Full Name, Email, and Password via Supabase Auth
+   * Create an account with Username and Password (Email is optional profile info and not verified)
    */
-  async signUpWithEmail(params: {
-    fullName: string;
-    email: string;
+  async signUp(params: {
+    username: string;
     password: string;
+    email?: string;
+    fullName?: string;
   }): Promise<{ user: UserProfile; token: string; requiresVerification: boolean }> {
-    const cleanEmail = params.email.trim().toLowerCase();
-    const cleanName = params.fullName.trim();
+    const cleanUsername = params.username.trim().toLowerCase();
+    const cleanName = (params.fullName || cleanUsername).trim();
+    const cleanEmail = params.email?.trim().toLowerCase() || null;
+
+    if (cleanUsername.length < 3) {
+      throw new Error('Username must be at least 3 characters long.');
+    }
+    if (!/^[a-z0-9_-]+$/i.test(cleanUsername)) {
+      throw new Error('Username can only contain letters, numbers, underscores and hyphens.');
+    }
+    if (params.password.length < 8) {
+      throw new Error('Password must be at least 8 characters long.');
+    }
+    if (/^\d{4}$/.test(params.password)) {
+      throw new Error('A 4-digit code cannot be used as your account password.');
+    }
 
     if (isSupabaseConfigured && supabase) {
+      // Internal or user-provided email address for Supabase Auth identity
+      const targetEmail = cleanEmail || `${cleanUsername}@potfolioo.internal`;
+
       const { data, error } = await supabase.auth.signUp({
-        email: cleanEmail,
+        email: targetEmail,
         password: params.password,
         options: {
           data: {
+            username: cleanUsername,
             full_name: cleanName,
-            username: cleanEmail.split('@')[0],
           },
         },
       });
 
       if (error) {
-        if (error.message.toLowerCase().includes('invalid login credentials')) {
-          throw new Error('Invalid email or password. Please verify your password or use "Forgot password" to reset it.');
+        if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('user already exists')) {
+          throw new Error('This username or email is already taken. Please choose another.');
         }
         throw new Error(error.message);
       }
@@ -130,18 +148,29 @@ export class ClientAuthService {
         throw new Error('Registration failed to create an account.');
       }
 
-      // Check if user already exists (Supabase returns an empty identities array for duplicate emails)
+      // Check duplicate identity
       if (Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-        throw new Error(
-          'An account with this email address already exists. Please sign in with your password, or use "Forgot password" to reset it.'
-        );
+        throw new Error('This username or email is already taken. Please choose another.');
+      }
+
+      // Populate or update public.profiles with the username
+      try {
+        await supabase.from('profiles').upsert({
+          id: data.user.id,
+          username: cleanUsername,
+          full_name: cleanName,
+          email: cleanEmail,
+          updated_at: new Date().toISOString(),
+        });
+      } catch (profErr) {
+        console.warn('Profile upsert note:', profErr);
       }
 
       const profile: UserProfile = {
         id: data.user.id,
-        username: cleanName || cleanEmail.split('@')[0],
-        email: cleanEmail,
-        emailVerified: Boolean(data.user.email_confirmed_at),
+        username: cleanUsername,
+        email: cleanEmail || undefined,
+        emailVerified: true,
         phoneVerified: false,
         pinEnabled: false,
         provider: 'supabase',
@@ -150,54 +179,46 @@ export class ClientAuthService {
       };
 
       let activeSession = data.session;
-      let confirmedUser = data.user;
 
-      // Attempt immediate sign-in to obtain live JWT if auto-confirmed
+      // Immediate sign-in if needed to acquire live session
       if (!activeSession) {
         try {
           const loginRes = await supabase.auth.signInWithPassword({
-            email: cleanEmail,
+            email: targetEmail,
             password: params.password,
           });
           if (loginRes.data?.session) {
             activeSession = loginRes.data.session;
-            confirmedUser = loginRes.data.user || confirmedUser;
           }
         } catch {
-          // If Supabase project requires confirmation, proceed with instant local-ready session
+          // Fallback to local session
         }
       }
 
       const sessionToken = activeSession?.access_token || `token_${data.user.id}_${Date.now()}`;
-      const finalProfile: UserProfile = {
-        ...profile,
-        emailVerified: true, // Mark verified directly so onboarding opens immediately
-      };
-
-      // Always establish the active user session immediately
       const session: AuthSession = {
         token: sessionToken,
-        user: finalProfile,
+        user: profile,
       };
       this.saveSession(session);
-      await db.userProfiles.put(finalProfile);
+      await db.userProfiles.put(profile);
 
       return {
-        user: finalProfile,
+        user: profile,
         token: sessionToken,
         requiresVerification: false,
       };
     }
 
-    // Fallback to local server API if Supabase is not configured
+    // Fallback to local Express server API
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        username: cleanName.toLowerCase().replace(/[^a-z0-9_]/g, '_'),
-        contact: cleanEmail,
-        contactType: 'email',
+        username: cleanUsername,
         password: params.password,
+        email: cleanEmail || undefined,
+        fullName: cleanName,
       }),
     });
 
@@ -221,34 +242,82 @@ export class ClientAuthService {
   }
 
   /**
-   * Sign In with Email and Password
+   * Backward-compatible sign up with email wrapper
    */
-  async signInWithEmail(email: string, password: string): Promise<{ user: UserProfile; token: string }> {
-    const cleanEmail = email.trim().toLowerCase();
+  async signUpWithEmail(params: {
+    fullName: string;
+    email: string;
+    password: string;
+  }): Promise<{ user: UserProfile; token: string; requiresVerification: boolean }> {
+    const username = params.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+    return this.signUp({
+      username,
+      password: params.password,
+      email: params.email,
+      fullName: params.fullName,
+    });
+  }
+
+  /**
+   * Sign In with Username or Email and Password
+   */
+  async signIn(identifier: string, password: string): Promise<{ user: UserProfile; token: string }> {
+    const cleanId = identifier.trim().toLowerCase();
+
+    if (!cleanId || !password) {
+      throw new Error('Please enter both your username and password.');
+    }
 
     if (isSupabaseConfigured && supabase) {
+      let targetEmail = cleanId;
+
+      // If user typed a username rather than an email, resolve it
+      if (!cleanId.includes('@')) {
+        targetEmail = `${cleanId}@potfolioo.internal`;
+        try {
+          const { data: resolvedEmail } = await supabase.rpc('get_auth_email_by_identifier', {
+            lookup_identifier: cleanId,
+          });
+          if (resolvedEmail && typeof resolvedEmail === 'string') {
+            targetEmail = resolvedEmail;
+          }
+        } catch {
+          // If RPC fails or not available, use deterministic fallback
+        }
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
+        email: targetEmail,
         password,
       });
 
-      if (error) {
-        if (error.message.toLowerCase().includes('invalid login credentials')) {
-          throw new Error('Invalid email or password. Please verify your password or use "Forgot password" to reset it.');
+      if (error || !data.user) {
+        // Generic error to avoid revealing whether username exists
+        throw new Error('Invalid username or password. Please check your credentials.');
+      }
+
+      // Read profile username
+      let displayUsername = data.user.user_metadata?.username || cleanId;
+      try {
+        const { data: profileRow } = await supabase
+          .from('profiles')
+          .select('username, full_name, email')
+          .eq('id', data.user.id)
+          .maybeSingle();
+        if (profileRow?.username) {
+          displayUsername = profileRow.username;
         }
-        throw new Error(error.message);
+      } catch {
+        // Non-blocking
       }
 
-      if (!data.user) {
-        throw new Error('Sign in failed. Please check your credentials.');
-      }
-
+      const isInternalEmail = data.user.email?.endsWith('@potfolioo.internal');
       const profile: UserProfile = {
         id: data.user.id,
-        username: data.user.user_metadata?.full_name || data.user.user_metadata?.username || cleanEmail.split('@')[0],
-        email: data.user.email,
-        emailVerified: Boolean(data.user.email_confirmed_at),
-        phoneVerified: Boolean(data.user.phone_confirmed_at),
+        username: displayUsername,
+        email: isInternalEmail ? undefined : data.user.email,
+        emailVerified: true,
+        phoneVerified: false,
         pinEnabled: false,
         provider: 'supabase',
         createdAt: data.user.created_at,
@@ -266,16 +335,16 @@ export class ClientAuthService {
       return { user: profile, token: session.token };
     }
 
-    // Backend fallback
+    // Local Express server fallback
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier: cleanEmail, password }),
+      body: JSON.stringify({ identifier: cleanId, password }),
     });
 
     const body = await res.json();
     if (!res.ok || !body.success) {
-      throw new Error(body.error?.message || 'Invalid email or password.');
+      throw new Error('Invalid username or password. Please check your credentials.');
     }
 
     const session: AuthSession = {
@@ -286,6 +355,13 @@ export class ClientAuthService {
     await db.userProfiles.put(body.data.user);
 
     return { user: body.data.user, token: body.data.token };
+  }
+
+  /**
+   * Backward-compatible sign in with email wrapper
+   */
+  async signInWithEmail(email: string, password: string): Promise<{ user: UserProfile; token: string }> {
+    return this.signIn(email, password);
   }
 
   /**

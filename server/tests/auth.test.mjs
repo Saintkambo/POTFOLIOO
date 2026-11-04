@@ -1,6 +1,8 @@
 import { runMigrations } from '../src/infrastructure/db/migrations.js';
 import { getDb, closeDb } from '../src/infrastructure/db/connection.js';
 import { AuthService } from '../src/application/services/auth-service.js';
+import { BookService } from '../src/application/services/book-service.js';
+import { TransactionService } from '../src/application/services/transaction-service.js';
 import { hashSecret, verifySecret } from '../src/infrastructure/security/hash.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,14 +30,12 @@ try {
   if (verifySecret('WrongPassword', hash, salt)) throw new Error('Verification should reject wrong secret');
   console.log('   ✅ Password hashing and timing-safe verification verified.');
 
-  // 3. Test Registration and 4-Digit Password Rejection
+  // 3. Test Registration with Username & Password (No email required)
   console.log('3. Testing Registration & Rejection of 4-digit code as sole cloud password...');
   let rejectedFourDigit = false;
   try {
     await authService.register({
       username: 'test_user1',
-      contact: 'test1@example.com',
-      contactType: 'email',
       password: '1234', // 4-digit code as password
     });
   } catch (err) {
@@ -46,17 +46,26 @@ try {
     throw new Error('Expected 4-digit code to be rejected as account password');
   }
 
-  // Register valid user
+  // Register user with ONLY username and password (no email at all)
+  const usernameOnlyUser = await authService.register({
+    username: 'test_user1',
+    password: 'SecurePassword2026!',
+  });
+  if (!usernameOnlyUser.user || !usernameOnlyUser.token) throw new Error('Registration failed for username-only user');
+  if (usernameOnlyUser.user.username !== 'test_user1') throw new Error('Username mismatch');
+  if (usernameOnlyUser.user.email !== undefined) throw new Error('Email should be undefined for username-only account');
+  console.log('   ✅ Account created with username and password only (zero email/phone required).');
+
+  // Register user with username, password, and optional email
   const user1 = await authService.register({
     username: 'baraka_trader',
-    contact: 'baraka@business.com',
-    contactType: 'email',
+    email: 'baraka@business.com',
     password: 'SecurePassword2026!',
   });
   if (!user1.user || !user1.token) throw new Error('Registration failed to return user and token');
   if (user1.user.username !== 'baraka_trader') throw new Error('Username mismatch');
   if (user1.user.email !== 'baraka@business.com') throw new Error('Email mismatch');
-  console.log('   ✅ User registered successfully:', user1.user.username, user1.user.email);
+  console.log('   ✅ User registered successfully with optional email:', user1.user.username, user1.user.email);
 
   // 4. Test Login
   console.log('4. Testing User Login...');
@@ -64,9 +73,27 @@ try {
   if (!loginRes.user || !loginRes.token) throw new Error('Login failed');
   console.log('   ✅ Login with username succeeded.');
 
+  const loginUsernameOnlyRes = await authService.login('test_user1', 'SecurePassword2026!');
+  if (!loginUsernameOnlyRes.user) throw new Error('Login with username-only account failed');
+  console.log('   ✅ Login for username-only account succeeded.');
+
   const loginEmailRes = await authService.login('baraka@business.com', 'SecurePassword2026!');
-  if (!loginEmailRes.user) throw new Error('Login with email failed');
-  console.log('   ✅ Login with email succeeded.');
+  if (!loginEmailRes.user) throw new Error('Login with email succeeded.');
+  console.log('   ✅ Login with optional email succeeded.');
+
+  // Verify generic error message on invalid login (no username enumeration)
+  let genericErrorVerified = false;
+  try {
+    await authService.login('non_existent_user_999', 'RandomPassword123!');
+  } catch (err) {
+    if (err.message === 'Invalid username or password. Please check your credentials.') {
+      genericErrorVerified = true;
+    }
+  }
+  if (!genericErrorVerified) {
+    throw new Error('Login error must be generic to prevent username enumeration');
+  }
+  console.log('   ✅ Generic error verified: does not reveal whether a particular username exists.');
 
   // 5. Test Rate Limiting on Failed Login Attempts
   console.log('5. Testing Rate Limiting on repeated failed logins...');
@@ -179,7 +206,50 @@ try {
   }
   console.log('   ✅ User 1 books:', user1Books.map((b) => b.name));
   console.log('   ✅ User 2 books:', user2Books.map((b) => b.name));
-  console.log('   ✅ Multi-user data strictly isolated between accounts.');
+
+  // Verify BookService and TransactionService enforce user ownership
+  const testBookService = new BookService();
+  const testTxService = new TransactionService();
+
+  const user1ListedBooks = testBookService.listBooks(user1.user.id);
+  if (!user1ListedBooks.some((b) => b.id === book1Id) || user1ListedBooks.some((b) => b.id === book2Id)) {
+    throw new Error('BookService listBooks failed user data isolation!');
+  }
+
+  let forbiddenHit = false;
+  try {
+    testBookService.getBook(book2Id, user1.user.id);
+  } catch (err) {
+    if (err.errorCode === 'FORBIDDEN' || err.statusCode === 403) {
+      forbiddenHit = true;
+    }
+  }
+  if (!forbiddenHit) {
+    throw new Error('BookService getBook failed to reject cross-user access!');
+  }
+
+  // Test TransactionService creation in another user's book is rejected
+  let txForbiddenHit = false;
+  try {
+    testTxService.createTransaction(
+      {
+        bookId: book2Id, // User 2's book
+        type: 'income',
+        amountMinor: 5000000,
+        transactionDate: '2026-11-04',
+      },
+      user1.user.id // Attempted by User 1
+    );
+  } catch (err) {
+    if (err.errorCode === 'FORBIDDEN' || err.statusCode === 403) {
+      txForbiddenHit = true;
+    }
+  }
+  if (!txForbiddenHit) {
+    throw new Error('TransactionService failed to reject transaction in another user book!');
+  }
+
+  console.log('   ✅ Multi-user data strictly isolated and enforced across BookService and TransactionService.');
 
   // 9. Verify Loading Screen in App.tsx (No words, no branding)
   console.log('9. Verifying Loading Screen specification...');

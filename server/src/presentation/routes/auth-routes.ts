@@ -24,15 +24,17 @@ export function createAuthRouter(): Router {
   // 1. User Registration
   router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { username, contact, contactType, password, verificationCode } = req.body;
-      if (!username || !contact || !contactType || !password) {
-        throw new ValidationError('fields', 'Username, contact, contactType, and password are required.');
+      const { username, password, email, fullName, contact, contactType, verificationCode } = req.body;
+      if (!username || !password) {
+        throw new ValidationError('fields', 'Username and password are required.');
       }
       const result = await authService.register({
         username,
+        password,
+        email: email || (contactType === 'email' ? contact : undefined),
+        fullName,
         contact,
         contactType,
-        password,
         verificationCode,
       });
 

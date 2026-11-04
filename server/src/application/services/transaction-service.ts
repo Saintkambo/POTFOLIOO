@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { SqliteTransactionRepository } from '../../infrastructure/repositories/sqlite-transaction-repository.js';
 import { SqliteBookRepository } from '../../infrastructure/repositories/sqlite-book-repository.js';
 import { Transaction, TransactionType } from '../../domain/models/transaction.js';
-import { NotFoundError } from '../../domain/errors.js';
+import { NotFoundError, ForbiddenError } from '../../domain/errors.js';
 
 export class TransactionService {
   constructor(
@@ -10,10 +10,16 @@ export class TransactionService {
     private bookRepo = new SqliteBookRepository()
   ) {}
 
-  getTransaction(id: string): Transaction {
+  getTransaction(id: string, userId?: string): Transaction {
     const tx = this.txRepo.findById(id);
     if (!tx) {
       throw new NotFoundError('Transaction', id);
+    }
+    if (userId) {
+      const book = this.bookRepo.findById(tx.bookId);
+      if (book && book.userId && book.userId !== userId) {
+        throw new ForbiddenError('You do not have permission to access this transaction.');
+      }
     }
     return tx;
   }
@@ -27,33 +33,43 @@ export class TransactionService {
       category?: string;
       limit?: number;
       offset?: number;
-    }
+    },
+    userId?: string
   ): Transaction[] {
     const book = this.bookRepo.findById(bookId);
     if (!book) {
       throw new NotFoundError('Book', bookId);
     }
+    if (userId && book.userId && book.userId !== userId) {
+      throw new ForbiddenError('You do not have permission to access this book.');
+    }
     return this.txRepo.listByBook(bookId, filters);
   }
 
-  createTransaction(data: {
-    id?: string;
-    bookId: string;
-    type: TransactionType;
-    amountMinor: number;
-    transactionDate: string;
-    category?: string | null;
-    note?: string | null;
-    tenantName?: string | null;
-    roomNumber?: string | null;
-    phoneNumber?: string | null;
-    chargePerRoom?: number | null;
-    monthsPaid?: number | null;
-    dueDate?: string | null;
-  }): Transaction {
+  createTransaction(
+    data: {
+      id?: string;
+      bookId: string;
+      type: TransactionType;
+      amountMinor: number;
+      transactionDate: string;
+      category?: string | null;
+      note?: string | null;
+      tenantName?: string | null;
+      roomNumber?: string | null;
+      phoneNumber?: string | null;
+      chargePerRoom?: number | null;
+      monthsPaid?: number | null;
+      dueDate?: string | null;
+    },
+    userId?: string
+  ): Transaction {
     const book = this.bookRepo.findById(data.bookId);
     if (!book) {
       throw new NotFoundError('Book', data.bookId);
+    }
+    if (userId && book.userId && book.userId !== userId) {
+      throw new ForbiddenError('You do not have permission to record transactions in this book.');
     }
 
     const now = new Date().toISOString();
@@ -93,9 +109,10 @@ export class TransactionService {
       chargePerRoom?: number | null;
       monthsPaid?: number | null;
       dueDate?: string | null;
-    }
+    },
+    userId?: string
   ): Transaction {
-    const existing = this.getTransaction(id);
+    const existing = this.getTransaction(id, userId);
 
     const updated: Transaction = {
       ...existing,
@@ -117,8 +134,9 @@ export class TransactionService {
     return updated;
   }
 
-  deleteTransaction(id: string, bookId?: string): void {
-    const deleted = this.txRepo.delete(id, bookId);
+  deleteTransaction(id: string, bookId?: string, userId?: string): void {
+    const existing = this.getTransaction(id, userId);
+    const deleted = this.txRepo.delete(id, bookId || existing.bookId);
     if (!deleted) {
       throw new NotFoundError('Transaction', id);
     }

@@ -1,12 +1,12 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { BackupService } from '../../infrastructure/backup/backup-service.js';
 import { serializeTransactionsToCsv } from '../../infrastructure/backup/csv-serializer.js';
 import { SqliteTransactionRepository } from '../../infrastructure/repositories/sqlite-transaction-repository.js';
 import { SqliteBookRepository } from '../../infrastructure/repositories/sqlite-book-repository.js';
 import { validate } from '../middlewares/validate.js';
-import { requireApiKey } from '../middlewares/auth.js';
+import { requireApiKey, requireAuth } from '../middlewares/auth.js';
 import { RestoreBackupSchema } from '../../application/validation/schemas.js';
-import { NotFoundError } from '../../domain/errors.js';
+import { NotFoundError, ForbiddenError } from '../../domain/errors.js';
 
 export function createBackupRouter(
   backupService = new BackupService(),
@@ -16,9 +16,18 @@ export function createBackupRouter(
   const router = Router();
 
   // GET /api/books/:bookId/backup/export
-  router.get('/books/:bookId/backup/export', (req, res, next) => {
+  router.get('/books/:bookId/backup/export', requireAuth, (req: Request, res: Response, next: NextFunction) => {
     try {
+      const userId = (req as any).user?.id;
       const bookId = req.params.bookId as string;
+      const book = bookRepo.findById(bookId);
+      if (!book) {
+        throw new NotFoundError('Book', bookId);
+      }
+      if (userId && book.userId && book.userId !== userId) {
+        throw new ForbiddenError('You do not have permission to export this book.');
+      }
+
       const backup = backupService.exportBackup(bookId);
       res.setHeader('Content-Type', 'application/json');
       res.setHeader(
@@ -36,7 +45,7 @@ export function createBackupRouter(
     '/backup/restore',
     requireApiKey,
     validate({ body: RestoreBackupSchema }),
-    (req, res, next) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const result = backupService.restoreBackup(req.body);
         res.json({ success: true, data: result });
@@ -47,12 +56,16 @@ export function createBackupRouter(
   );
 
   // GET /api/books/:bookId/export/csv
-  router.get('/books/:bookId/export/csv', (req, res, next) => {
+  router.get('/books/:bookId/export/csv', requireAuth, (req: Request, res: Response, next: NextFunction) => {
     try {
+      const userId = (req as any).user?.id;
       const bookId = req.params.bookId as string;
       const book = bookRepo.findById(bookId);
       if (!book) {
         throw new NotFoundError('Book', bookId);
+      }
+      if (userId && book.userId && book.userId !== userId) {
+        throw new ForbiddenError('You do not have permission to export this book.');
       }
 
       const transactions = txRepo.listByBook(bookId);

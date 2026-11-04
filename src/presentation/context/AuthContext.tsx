@@ -18,6 +18,10 @@ interface AuthContextType {
   enterDemoMode: () => void;
   exitDemoMode: () => void;
 
+  // Modern Username & Password Auth
+  signUp: (params: { username: string; password: string; email?: string; fullName?: string }) => Promise<{ requiresVerification: boolean; user?: UserProfile; token?: string }>;
+  signIn: (identifier: string, password: string) => Promise<void>;
+
   // Modern Supabase & Unified Auth
   signUpWithEmail: (params: { fullName: string; email: string; password: string }) => Promise<{ requiresVerification: boolean; email: string; user?: UserProfile; token?: string }>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
@@ -176,18 +180,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Supabase Sign Up with Email -> Direct to Opening Business
-  const signUpWithEmail = async (params: { fullName: string; email: string; password: string }) => {
+  // Primary Username & Password Sign Up
+  const signUp = async (params: { username: string; password: string; email?: string; fullName?: string }) => {
     setAuthError(null);
     try {
-      const res = await clientAuthService.signUpWithEmail(params);
+      const res = await clientAuthService.signUp(params);
       const session: AuthSession = { user: res.user, token: res.token };
       setCurrentUser(res.user);
       setAuthSession(session);
       setIsAppLocked(false);
       return {
         requiresVerification: false,
-        email: params.email,
         user: res.user,
         token: res.token,
       };
@@ -195,6 +198,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAuthError(err.message || 'Registration failed');
       throw err;
     }
+  };
+
+  // Primary Username / Email Sign In
+  const signIn = async (identifier: string, password: string) => {
+    setAuthError(null);
+    try {
+      const { user, token } = await clientAuthService.signIn(identifier, password);
+      const session: AuthSession = { user, token };
+      setCurrentUser(user);
+      setAuthSession(session);
+
+      const pin = clientAuthService.getPinLockState();
+      setPinState(pin);
+      if (pin.enabled) {
+        setIsAppLocked(true);
+      } else {
+        setIsAppLocked(false);
+      }
+    } catch (err: any) {
+      setAuthError(err.message || 'Sign in failed');
+      throw err;
+    }
+  };
+
+  // Backward compatible Sign Up with Email
+  const signUpWithEmail = async (params: { fullName: string; email: string; password: string }) => {
+    const cleanUsername = params.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+    const res = await signUp({
+      username: cleanUsername,
+      password: params.password,
+      email: params.email,
+      fullName: params.fullName,
+    });
+    return {
+      requiresVerification: false,
+      email: params.email,
+      user: res.user,
+      token: res.token,
+    };
   };
 
   // Instant bypass verification (for dev, testing, or deferred email validation)
@@ -212,26 +254,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Supabase Sign In with Email
+  // Backward compatible Sign In with Email
   const signInWithEmail = async (email: string, password: string) => {
-    setAuthError(null);
-    try {
-      const { user, token } = await clientAuthService.signInWithEmail(email, password);
-      const session: AuthSession = { user, token };
-      setCurrentUser(user);
-      setAuthSession(session);
-
-      const pin = clientAuthService.getPinLockState();
-      setPinState(pin);
-      if (pin.enabled) {
-        setIsAppLocked(true);
-      } else {
-        setIsAppLocked(false);
-      }
-    } catch (err: any) {
-      setAuthError(err.message || 'Sign in failed');
-      throw err;
-    }
+    return signIn(email, password);
   };
 
   const resendVerificationEmail = async (email: string) => {
@@ -402,6 +427,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearAuthError,
         enterDemoMode,
         exitDemoMode,
+        signUp,
+        signIn,
         signUpWithEmail,
         signInWithEmail,
         resendVerificationEmail,

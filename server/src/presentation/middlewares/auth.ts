@@ -2,6 +2,21 @@ import { Request, Response, NextFunction } from 'express';
 import crypto from 'node:crypto';
 import { env } from '../../config/env.js';
 import { UnauthorizedError } from '../../domain/errors.js';
+import { authService } from '../../application/services/auth-service.js';
+
+export async function requireAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return next(new UnauthorizedError('Missing or invalid Authorization header. Please log in.'));
+  }
+  const token = authHeader.substring(7).trim();
+  const user = await authService.authenticateByToken(token);
+  if (!user) {
+    return next(new UnauthorizedError('Invalid or expired session token. Please log in again.'));
+  }
+  (req as any).user = user;
+  next();
+}
 
 export function requireApiKey(req: Request, _res: Response, next: NextFunction): void {
   // Allow bypassing auth in dev if header is not supplied, or strictly require when present
